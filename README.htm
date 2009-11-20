@@ -331,6 +331,12 @@ cluster creation, setup, and control automated as well by using peg.</p>
 the one executable script with a subcommand, followed by what you want it to
 operate on, which right now is always a project name.</p>
 </div>
+<div class="section" id="installation">
+<h1>Installation</h1>
+<p>peg is so far a single script that doesn't rely on anything else.  You
+can just it to any directory that's in your path, such as /usr/local/bin
+for a system-wide install.</p>
+</div>
 <div class="section" id="directory-layout">
 <h1>Directory layout</h1>
 <p>peg assumes you are installing your Postgres database as a regular user,
@@ -387,8 +393,10 @@ to match the workflow of git users better than checking out a separate copy
 for each project.  This is simple enough to change:  in between the init and
 build steps, you can remove the symlink and manually copy the master repo.</p>
 <p>TODO:  Provide an example of that</p>
+</div>
+</div>
 <div class="section" id="sample-tgz-session">
-<h3>Sample tgz session</h3>
+<h1>Sample tgz session</h1>
 <p>Here's how you might use peg to test out an alpha build downloaded in source
 code form.  To do that instead of using a regular repo, you merely need to
 create a tgz repo directory and drop the file into there:</p>
@@ -403,9 +411,21 @@ peg init test
 . peg build
 psql
 </pre>
+<div class="section" id="cvs-or-tgz-repo-with-patch">
+<h2>cvs or tgz repo with patch</h2>
+<p>Here's how you might test a patch using CVS for the base repo:</p>
+<pre class="literal-block">
+peg init test
+cd pgwork/src/test
+patch -p 0 &lt; some.patch
+. peg build
+psql
+</pre>
+<p>TODO:  Test the above</p>
+</div>
 </div>
 <div class="section" id="sample-git-session">
-<h3>Sample git session</h3>
+<h1>Sample git session</h1>
 <p>You can clone the postgresql.org git repo just by changing your default
 PGVCS to be git:</p>
 <blockquote>
@@ -421,9 +441,8 @@ psql</p>
 matches the name of the project.</p>
 <p>TODO You can probably force this just by creating a repo/git directory too.
 Need to document that logic.</p>
-</div>
 <div class="section" id="git-repo-with-patch">
-<h3>git repo with patch</h3>
+<h2>git repo with patch</h2>
 <p>Here's how you might test a patch using git for the base repo:</p>
 <pre class="literal-block">
 peg init test
@@ -434,20 +453,9 @@ psql
 </pre>
 <p>TODO:  Test the above</p>
 </div>
-<div class="section" id="cvs-or-tgz-repo-with-patch">
-<h3>cvs or tgz repo with patch</h3>
-<p>Here's how you might test a patch using CVS for the base repo:</p>
-<pre class="literal-block">
-peg init test
-cd pgwork/src/test
-patch -p 0 &lt; some.patch
-. peg build
-psql
-</pre>
-<p>TODO:  Test the above</p>
 </div>
 <div class="section" id="sample-two-cluster-session">
-<h3>Sample two-cluster session</h3>
+<h1>Sample two-cluster session</h1>
 <p>Here is a complicated peg installation.  The intent is to start two database
 clusters that shared the same source code and binary set, perhaps for testing
 replication with two &quot;nodes&quot; on a single server.  This is relatively easy
@@ -491,7 +499,7 @@ peg stop
 <p>TODO:  Test that last part</p>
 </div>
 <div class="section" id="base-directory-detection">
-<h3>Base directory detection</h3>
+<h1>Base directory detection</h1>
 <p>The entire peg directory tree is based in a directory recommended to be
 named pgwork.  If you use another directory, you can make the script use
 it by setting the PGWORK environment variable.  The sequence searched to find
@@ -508,7 +516,7 @@ a working area is:</p>
 subdirectory in one of these locations.</p>
 </div>
 <div class="section" id="command-summary">
-<h3>Command summary</h3>
+<h1>Command summary</h1>
 <p>The following subcommands are accepted by peg:</p>
 <blockquote>
 <ul class="simple">
@@ -528,7 +536,7 @@ database configuration before you start it.</li>
 </blockquote>
 </div>
 <div class="section" id="shortcuts">
-<h3>Shortcuts</h3>
+<h1>Shortcuts</h1>
 <p>Once you've gotten an environment setup, using it again can be as easy as:</p>
 <pre class="literal-block">
 . peg switch
@@ -553,7 +561,7 @@ initialization.  It's unlikely you'll need those while doing PostgreSQL
 work too, so re-using those commands for this should save you some typing.</p>
 </div>
 <div class="section" id="environment-variable-reference">
-<h3>Environment variable reference</h3>
+<h1>Environment variable reference</h1>
 <p>You can see the main environment variables peg uses internally with:</p>
 <pre class="literal-block">
 peg status &lt;project&gt;
@@ -591,7 +599,7 @@ export PGDEBUG=&quot; &quot;
 </blockquote>
 </div>
 <div class="section" id="known-issues">
-<h3>Known issues</h3>
+<h1>Known issues</h1>
 <p>See TODO notes in the peg source code (and even this documentation) for the
 open issues in the code.  Some of the rougher edges right now:</p>
 <blockquote>
@@ -606,7 +614,7 @@ slowing down how fast commands can be found in your PATH a bit.</li>
 </blockquote>
 </div>
 <div class="section" id="credits">
-<h3>Credits</h3>
+<h1>Credits</h1>
 <p>Copyright (c) 2009, Gregory Smith
 All rights reserved.
 See COPYRIGHT file for full license details</p>
@@ -625,8 +633,6 @@ and Jeff both had their own way to organize PostgreSQL installations
 in their respective home directories that I found interesting when we
 worked together on projects.</li>
 </ul>
-</div>
-</div>
 </div>
 </div>
 </body>

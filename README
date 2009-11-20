@@ -44,6 +44,13 @@ peg takes commands similarly to common version control systems:  you call
 the one executable script with a subcommand, followed by what you want it to
 operate on, which right now is always a project name.
 
+Installation
+============
+
+peg is so far a single script that doesn't rely on anything else.  You
+can just it to any directory that's in your path, such as /usr/local/bin
+for a system-wide install.
+
 Directory layout
 ================
 
@@ -106,7 +113,7 @@ build steps, you can remove the symlink and manually copy the master repo.
 TODO:  Provide an example of that
 
 Sample tgz session
-------------------
+==================
 
 Here's how you might use peg to test out an alpha build downloaded in source
 code form.  To do that instead of using a regular repo, you merely need to
@@ -122,8 +129,21 @@ create a tgz repo directory and drop the file into there::
   . peg build
   psql
 
+cvs or tgz repo with patch
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here's how you might test a patch using CVS for the base repo::
+
+  peg init test
+  cd pgwork/src/test
+  patch -p 0 < some.patch
+  . peg build
+  psql
+
+TODO:  Test the above
+
 Sample git session
-------------------
+==================
 
 You can clone the postgresql.org git repo just by changing your default
 PGVCS to be git:
@@ -144,7 +164,7 @@ TODO You can probably force this just by creating a repo/git directory too.
 Need to document that logic.
 
 git repo with patch
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 Here's how you might test a patch using git for the base repo::
 
@@ -156,21 +176,8 @@ Here's how you might test a patch using git for the base repo::
 
 TODO:  Test the above
 
-cvs or tgz repo with patch
---------------------------
-
-Here's how you might test a patch using CVS for the base repo::
-
-  peg init test
-  cd pgwork/src/test
-  patch -p 0 < some.patch
-  . peg build
-  psql
-
-TODO:  Test the above
-
 Sample two-cluster session
---------------------------
+==========================
 
 Here is a complicated peg installation.  The intent is to start two database
 clusters that shared the same source code and binary set, perhaps for testing
@@ -215,7 +222,7 @@ environment variable you sourced in.  Instead you need to do this::
 TODO:  Test that last part
 
 Base directory detection
-------------------------
+========================
 
 The entire peg directory tree is based in a directory recommended to be
 named pgwork.  If you use another directory, you can make the script use
@@ -231,7 +238,7 @@ peg assumes it found a correct working area when there is a "repo"
 subdirectory in one of these locations.
 
 Command summary
----------------
+===============
 
 The following subcommands are accepted by peg:
 
@@ -249,7 +256,7 @@ The following subcommands are accepted by peg:
  * stop:  Stop a cluster
 
 Shortcuts
----------
+=========
 
 Once you've gotten an environment setup, using it again can be as easy as::
 
@@ -274,7 +281,7 @@ initialization.  It's unlikely you'll need those while doing PostgreSQL
 work too, so re-using those commands for this should save you some typing.
 
 Environment variable reference
-------------------------------
+==============================
 
 You can see the main environment variables peg uses internally with::
 
@@ -304,7 +311,7 @@ points to a separate location where you want your database to go.
      export PGDEBUG=" "  
 
 Known issues
-------------
+============
 
 See TODO notes in the peg source code (and even this documentation) for the
 open issues in the code.  Some of the rougher edges right now:
@@ -317,7 +324,7 @@ open issues in the code.  Some of the rougher edges right now:
    slowing down how fast commands can be found in your PATH a bit.
 
 Credits
--------
+=======
 
 Copyright (c) 2009, Gregory Smith
 All rights reserved.
