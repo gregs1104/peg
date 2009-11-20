@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<title></title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 5196 2007-06-03 20:25:28Z wiemann $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left {
+  clear: left }
+
+img.align-right {
+  clear: right }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font-family: serif ;
+  font-size: 100% }
+
+pre.literal-block, pre.doctest-block {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document">
+
+
+<div class="section" id="what-is-peg">
+<h1>What is peg?</h1>
+<p>peg stands for PostgreSQL Environment Generator.  It's a fairly complicated
+script that automates most of the repetitive work required to install test
+instances of PostgreSQL.  It's primarily aimed at developers who are building
+from source control (cvs, git) and toward reviewers who are trying out a
+source code package (.tar.gz), including release source snapshots and the
+alpha/beta builds.</p>
+</div>
+<div class="section" id="motivation">
+<h1>Motivation</h1>
+<p>peg usage relies heavily on environment variables.  As much as possible, it
+mirrors the environment setups of two common PostgreSQL setups:</p>
+<blockquote>
+<ul class="simple">
+<li>The psql client and other programs that use the libpq library look for
+environment variables such as PGPORT to change their behavior.  Server
+startup does some of this as well, such as using PGDATA to set the database
+location.</li>
+<li>The RPM packaging used by RedHat's PostgreSQL server uses a sourced
+environment stored in /etc/sysconfig/postgresql/postgresql which defines
+PGDATA.  One useful idiom when working with postgresql is to have the
+login profile of the postresql user and others using Postgres to source
+this file, and therefore have the exact same settings used to start
+the server.</li>
+</ul>
+</blockquote>
+<p>The idea is that once you've setup and environment with peg, the environment
+variables you'll have available to you will match what you'd get if you
+were logging into a production RHEL server running the standard PostgreSQL
+RPM set.  Once peg as setup your environment, commands like the following
+will work, exactly the same as if you'd sourced the sysconfig file on
+a production RHEL server:</p>
+<pre class="literal-block">
+pg_ctl start -l $PGLOG
+$EDITOR $PGDATA/postgresql.conf
+</pre>
+<p>TODO:  Show a sample RHEL sysconfig script for comparison sake</p>
+<p>Whether or not you find that useful, you'll also get source code builds and
+cluster creation, setup, and control automated as well by using peg.</p>
+<p>peg takes commands similarly to common version control systems:  you call
+the one executable script with a subcommand, followed by what you want it to
+operate on, which right now is always a project name.</p>
+</div>
+<div class="section" id="directory-layout">
+<h1>Directory layout</h1>
+<p>peg assumes you are installing your Postgres database as a regular user,
+typically in your home directory.  It allows you have to multiple &quot;projects&quot;
+installed in this structure, each of which gets its own source code, binaries,
+and database.</p>
+<p>The easiest way to make peg work is to create a $HOME/pgwork directory and
+let peg manage the whole thing for you:</p>
+<pre class="literal-block">
+cd
+mkdir -p pgwork
+# Repo setup:  CVS
+peg init test
+. peg build
+psql
+</pre>
+<p>This will synchronize with the master PostgreSQL CVS servers via rsync, using
+the same techniques documented at
+<a class="reference external" href="http://wiki.postgresql.org/wiki/Working_with_CVS">http://wiki.postgresql.org/wiki/Working_with_CVS</a>
+(The outline given in its &quot;Initial setup&quot; section is actually peg's distant
+ancestor)</p>
+<p>This will get you a directory tree that looks like this (this is simplified to
+only include the basic outline, there will be more in there):</p>
+<pre class="literal-block">
+pgwork/
+|-- data
+|   `-- test
+|-- inst
+|   `-- test
+|       `-- bin
+|-- repo
+|   `-- cvs
+`-- src
+    `-- test
+</pre>
+<p>There will only be one repo directory for each of the projects hosted in
+this work area, and each project will checkout its own unique copy of that
+repo into its work area--unless you are using git; see below.</p>
+<p>The top level directories are intended to work like this:</p>
+<blockquote>
+<ul class="simple">
+<li>pgwork/repo:  The one copy of the master repo all projects share</li>
+<li>pgwork/src/project:  Checked out copy of the repo with this project's source</li>
+<li>pgwork/inst/project:  Binaries build by the &quot;make install&quot; step</li>
+<li>pgwork/data/project:  Hold the database cluster created by initdb</li>
+</ul>
+</blockquote>
+<div class="section" id="source-code-layout-for-git">
+<h2>Source code layout for git</h2>
+<p>If you are using git for your repo, the src/ directory is just a symbolic link
+to the repo itself, so that every project shares the same repo.  Each project
+is instead given its own branch when you first use &quot;peg init&quot;.  This seems
+to match the workflow of git users better than checking out a separate copy
+for each project.  This is simple enough to change:  in between the init and
+build steps, you can remove the symlink and manually copy the master repo.</p>
+<p>TODO:  Provide an example of that</p>
+<div class="section" id="sample-tgz-session">
+<h3>Sample tgz session</h3>
+<p>Here's how you might use peg to test out an alpha build downloaded in source
+code form.  To do that instead of using a regular repo, you merely need to
+create a tgz repo directory and drop the file into there:</p>
+<pre class="literal-block">
+# Repo setup:  tgz
+cd
+mkdir -p pgwork/repo/tgz
+cp postgresql-8.5alpha2.tar.gz pgwork/repo/tgz
+
+# Basic install
+peg init test
+. peg build
+psql
+</pre>
+</div>
+<div class="section" id="sample-git-session">
+<h3>Sample git session</h3>
+<p>You can clone the postgresql.org git repo just by changing your default
+PGVCS to be git:</p>
+<blockquote>
+<p>cd
+mkdir -p pgwork</p>
+<p># Repo setup:  git
+export PGVCS=git
+peg init test
+. peg build
+psql</p>
+</blockquote>
+<p>At this point your sole git repository will be switched to a new branch that
+matches the name of the project.</p>
+<p>TODO You can probably force this just by creating a repo/git directory too.
+Need to document that logic.</p>
+</div>
+<div class="section" id="git-repo-with-patch">
+<h3>git repo with patch</h3>
+<p>Here's how you might test a patch using git for the base repo:</p>
+<pre class="literal-block">
+peg init test
+cd pgwork/src/test
+git apply some.patch
+. peg build
+psql
+</pre>
+<p>TODO:  Test the above</p>
+</div>
+<div class="section" id="cvs-or-tgz-repo-with-patch">
+<h3>cvs or tgz repo with patch</h3>
+<p>Here's how you might test a patch using CVS for the base repo:</p>
+<pre class="literal-block">
+peg init test
+cd pgwork/src/test
+patch -p 0 &lt; some.patch
+. peg build
+psql
+</pre>
+<p>TODO:  Test the above</p>
+</div>
+<div class="section" id="sample-two-cluster-session">
+<h3>Sample two-cluster session</h3>
+<p>Here is a complicated peg installation.  The intent is to start two database
+clusters that shared the same source code and binary set, perhaps for testing
+replication with two &quot;nodes&quot; on a single server.  This is relatively easy
+to script, using peg to do most of the dirty work normally required here:</p>
+<pre class="literal-block">
+# Two node cluster setup
+peg init master
+peg init slave
+
+# Make the slave use the same source code and binaries as the slave
+pushd pgwork/inst
+rm -rf slave
+ln -s master slave
+popd
+
+pushd pgwork/src
+rm -rf slave
+ln -s master slave
+popd
+
+# Start the master
+peg build master
+# Can't source the above yet, because then PGDATA will be set
+# Start the slave
+PGPORT=5434 ; peg start slave ; PGPORT=
+. peg switch master
+
+psql
+psql -p 5434
+</pre>
+<p>Note that if you now try to stop the slave like this:</p>
+<pre class="literal-block">
+peg stop slave
+</pre>
+<p>This won't actually work, because it will be still using the PGDATA
+environment variable you sourced in.  Instead you need to do this:</p>
+<pre class="literal-block">
+. peg switch slave
+peg stop
+</pre>
+<p>TODO:  Test that last part</p>
+</div>
+<div class="section" id="base-directory-detection">
+<h3>Base directory detection</h3>
+<p>The entire peg directory tree is based in a directory recommended to be
+named pgwork.  If you use another directory, you can make the script use
+it by setting the PGWORK environment variable.  The sequence searched to find
+a working area is:</p>
+<blockquote>
+<ol class="arabic simple">
+<li>The value passed for PGWORK</li>
+<li>The current directory</li>
+<li>$HOME/pgwork</li>
+<li>$HOME</li>
+</ol>
+</blockquote>
+<p>peg assumes it found a correct working area when there is a &quot;repo&quot;
+subdirectory in one of these locations.</p>
+</div>
+<div class="section" id="command-summary">
+<h3>Command summary</h3>
+<p>The following subcommands are accepted by peg:</p>
+<blockquote>
+<ul class="simple">
+<li>status:  Report on environment variables that would be in place if you were
+to execute a command.  Useful mainly for troubleshooting.</li>
+<li>init:  Create a repo and a project based on it, if one is named</li>
+<li>update:  Update your repo and a project based on it, if one is named</li>
+<li>build-only:  Execute the build steps and create a database cluster, but
+don't start it.  This is typically for if you know you need to modify the
+database configuration before you start it.</li>
+<li>build:  Build binaries, install them, create a cluster, start the databas</li>
+<li>initdb:  Create a cluster</li>
+<li>switch:  Switch to an existing built binary set and cluster</li>
+<li>start:  Start a cluster</li>
+<li>stop:  Stop a cluster</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="shortcuts">
+<h3>Shortcuts</h3>
+<p>Once you've gotten an environment setup, using it again can be as easy as:</p>
+<pre class="literal-block">
+. peg switch
+</pre>
+<p>That will use whatever project name you last gave the script and start the
+server up.  If you shutdown your system, that should be all that's needed
+to bring things back up again.</p>
+<p>When you source the peg script, along with getting settings like PGDATA
+available it also creates a couple of quick aliases you can use instead
+of calling peg for those functions:</p>
+<blockquote>
+<ul class="simple">
+<li>start:  If you already have a database cluster setup, start it</li>
+<li>stop:  Stop a running database with the slow shutdown code</li>
+<li>immediate:  Stop a running database immediately</li>
+</ul>
+</blockquote>
+<p>Here again, the names were picked to be similar to the
+&quot;service postgresql start&quot; and stop commands used by the RPM packaging.
+start and stop are used on some UNIX systems for job control or system
+initialization.  It's unlikely you'll need those while doing PostgreSQL
+work too, so re-using those commands for this should save you some typing.</p>
+</div>
+<div class="section" id="environment-variable-reference">
+<h3>Environment variable reference</h3>
+<p>You can see the main environment variables peg uses internally with:</p>
+<pre class="literal-block">
+peg status &lt;project&gt;
+</pre>
+<p>All of those values are set automatically only if you don't explicitly set
+them to something first.  This allows you to do things like use peg to
+manage your source and binary builds, while still having a PGDATA that
+points to a separate location where you want your database to go.</p>
+<blockquote>
+<ul>
+<li><p class="first">PGPORT:  Client programs use this to determine what port to connect on;
+if set, any &quot;peg start&quot; commands will start the server on that port.  See
+the multi-cluster example for how this might be used.</p>
+</li>
+<li><p class="first">PGVCS:  Valid options are &quot;cvs&quot;, &quot;git&quot;, and &quot;tgz&quot;.  If you have more
+than one type of source in your repo directory, you can
+use this to specify which of them you should use.</p>
+</li>
+<li><p class="first">PGWORK:  Base directory for working area.  See &quot;Base directory detection&quot;.</p>
+</li>
+<li><p class="first">PGPROJECT:  If this is set, it will become the project name used
+for all commands, regardless of what's passed on the command line.</p>
+</li>
+<li><p class="first">PGDEBUG:  By default, peg builds PostgreSQL with the standard flags
+you'd want to use for development and testing.  This includes assertions,
+which will slow down the code considerably.  If you want to build without
+assertions and debugging information, you'll need to set this to a
+non-empty value that can be passed through to &quot;configure&quot; without
+doing anything.  A space works for this, for example:</p>
+<pre class="literal-block">
+export PGDEBUG=&quot; &quot;
+</pre>
+</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="known-issues">
+<h3>Known issues</h3>
+<p>See TODO notes in the peg source code (and even this documentation) for the
+open issues in the code.  Some of the rougher edges right now:</p>
+<blockquote>
+<ul class="simple">
+<li>peg creates a database matching your name, which is what psql wants for a
+default.  It doesn't check whether it already exist first though, so you'll
+often see an error about that when starting a database.  This is harmless.</li>
+<li>If you source peg output repeatedly, it will pollute your PATH with
+multiple pointers to the same directory tree.  This is mostly harmless, just
+slowing down how fast commands can be found in your PATH a bit.</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="credits">
+<h3>Credits</h3>
+<p>Copyright (c) 2009, Gregory Smith
+All rights reserved.
+See COPYRIGHT file for full license details</p>
+<p>peg was written by Greg Smith to make all of the PostgreSQL systems he
+works on regularly have something closer to a common UI at the console.
+peg's directory layout and general design was inspired by several members
+of the PostgreSQL community, including:</p>
+<ul class="simple">
+<li>Heikki Linnakangas, whose outlined his personal work habits for
+interacting with the CVS repo and inspired Greg to
+write the original &quot;CVS+rsync Solutions&quot; section of
+<a class="reference external" href="http://wiki.postgresql.org/wiki/Working_with_CVS">http://wiki.postgresql.org/wiki/Working_with_CVS</a></li>
+<li>Alan Li, Jeff Davis, and other members of Truviso who I may not
+directly remember borrowing ideas from as much as those two.  Alan
+and Jeff both had their own way to organize PostgreSQL installations
+in their respective home directories that I found interesting when we
+worked together on projects.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,592 @@
+#!/bin/bash
+
+#
+# peg:  Wrapper script for setting up a useful working area to
+# hack on PostgreSQL code, covering everything from checking out
+# code to starting and stopping the database server.  
+#
+# The main UI to the code works using environment variables, similarly
+# to how the PostgreSQL server and client code both assume default
+# behavior; PGDATA for example.  The environment variable names used
+# by the standard RHEL RPM packaging are also used when appropriate,
+# such as PGLOG.
+
+#
+# Copyright (c) 2009, Gregory Smith
+# All rights reserved.
+# See COPYRIGHT for license details.
+#
+
+# Turn this on to get line-by-line execution details for the script, to
+# make debugging easier
+#set -x
+
+function usage {
+echo peg takes subcommands followed by a project name.  Available
+echo subcommands are:
+echo 
+echo status:  Report on environment variables that would be in place if you were
+echo to execute a command.  Useful mainly for troubleshooting.
+echo
+echo init:  Create a repo and a project based on it, if one is named
+echo
+echo update:  Update your repo and a project based on it, if one is named
+echo
+echo build-only:  Execute the build steps and create a database cluster, but
+echo "don't start it.  This is typically for if you know you need to modify the"
+echo database configuration before you start it.
+echo 
+echo build:  Build binaries, install them, create a cluster, start the databas
+echo initdb:  Create a cluster
+echo switch:  Switch to an existing built binary set and cluster
+echo start:  Start a cluster
+echo stop:  Stop a cluster
+}
+
+# Set $1 to $2 only if it's empty
+function set_if_empty {
+  # See "Shell Parameter Expansion" in the Bash manual for how this ! works
+  if [ -z "${!1}" ] ; then
+    eval "$1=\"$2\""
+  fi
+}
+
+COMMAND="$1"
+set_if_empty PGPROJECT "$2"
+# Typically if you're overriding this, you'll want to set PGDEBUG to
+# something harmless but not empty; a space would do.
+set_if_empty PGDEBUG "--enable-cassert --enable-debug"
+
+ERROR=
+
+# Default directory names.  Not really worth making these user
+# configurable; typically if you want something custom, you'll
+# be overriding the final result rather than this component
+# (i.e. customizing PGDATA rather than just DATADIR)
+
+REPODIR="repo"
+DATADIR="data"
+SRCDIR="src"
+INSTDIR="inst"
+LOGFILE="pg.log"
+
+# Defaults for what the various types of VCS directories you might
+# have or want would be named.  These directory names are also used
+# as the name of the repo type internally, so be careful if changing
+# them
+
+GITDIR="git"
+CVSDIR="cvs"
+TGZDIR="tgz"
+
+# Names of the top-level directory tree for the various repository types
+GITPGROOTDIR="postgresql"
+CVSPGROOTDIR="pgsql"
+
+function error {
+  # Report an error and save its value for exit and wrap's command filtering
+  ERROR=$1
+  echo ERROR:  $2
+}
+
+function wrap {
+  # Only executed passed function if we haven't gotten an error yet
+  # This whole scheme is necessary because we can't just call bash's exit if
+  # this script is sourced--that will exit from the shell rather than just
+  # this script.  Since sourcing it is the main we expect to be called,
+  # that's clearly not acceptable
+  if [ -z "$ERROR" ] ; then
+    $1
+  fi
+}
+
+function project_save {
+  # Remember and restore the project name we're given, to provide a useful
+  # guess for cases when it's not provided
+  if [ -n "$PGPROJECT" ] ; then
+    echo $PGPROJECT > $PGWORK/lastproject  
+  else
+    if [ -f "$PGWORK/lastproject" ] ; then
+      PGPROJECT=`cat $PGWORK/lastproject`
+      if [ -n "$PGPROJECT" ] ; then
+        echo "Using discovered last project $PGPROJECT"
+      fi
+    fi
+  fi
+}
+
+#
+# Handlers for the individual steps we might need executed
+#
+
+# Create all the directories we expect
+function setup {
+  mkdir -p $PGWORK $PGREPO $PGSRC $PGINST $PGREPO/$PGVCS
+  if [ -n "$PGPROJECT" ] ; then
+    mkdir -p $PGSRC/$PGPROJECT $PGDATA $PGBIN
+  fi
+}
+
+function pull_cvs {
+  export CVSROOT=$PGREPO/$PGVCS
+  mkdir -p $CVSROOT
+  rsync --progress -avzCH --delete anoncvs.postgresql.org::pgsql-cvs $CVSROOT
+}
+
+function link_project_git
+{
+  if [ -h "$PGSRC/$PGPROJECT" ] ; then
+    # This message is way too verbose
+    #echo "Project source $PGSRC/$PGPROJECT is already linked to git repo"
+    return
+  fi
+
+  # Remove this directory without any flags.  This will wipe it out only if
+  # it's empty, which is what we want.  That should be the case if this
+  # is a new project.  Cowardly refuse to do anything if the rmdir doesn't
+  # make the directory go away
+  rmdir $PGSRC/$PGPROJECT
+  if [ -d "$PGSRC/$PGPROJECT" ] ; then
+    error 14 "Failed to link project $PGSRC/$PGPROJECT to git, was expecting that to be an empty directory"
+  else
+    ln -s $GITROOT/$GITPGROOTDIR $PGSRC/$PGPROJECT
+  fi
+}
+
+function pull_git {
+  GITROOT=$PGREPO/$PGVCS
+  cd $GITROOT
+  if [ -d "$GITPGROOTDIR/.git" ] ; then
+    # Apparently we already have a repo around
+    echo "Updating existing git repository at $GITPGROOTDIR"
+    cd $GITPGROOTDIR
+    git fetch
+  else
+    echo "Creating new git repository from master repo"
+    git clone git://git.postgresql.org/git/postgresql.git
+  fi
+
+  if [ ! -d $GITROOT/$GITPGROOTDIR ] ; then
+    error 10 "$PGVCS repo at $GITROOT does not have expected directory $GITPGROOTDIR"
+  else
+    link_project_git
+  fi
+}
+
+function extract_project_tgz
+# Actual extraction that we can only do if there's a project directory
+{
+  cd $PGSRC/$PGPROJECT
+  # Try not to overwrite something; presumably at this point we should only
+  # have a blank source directory for this project.
+  if [ -f "configure" ] ; then
+    error 12 "Extraction from $TARFILE aborted because $PGSRC/$PGPROJECT isn't empty"
+  else
+    echo "Extracting repo to $PGSRC/$PGPROJECT"
+    # Since the "z" option to tar only exists in GNU tar, try to improve
+    # compatibility by doing it the log way
+    gzip -d -c $PGREPO/$PGVCS/$TARFILE | tar xf -
+    
+    # The tar file we just extracted is likely to have a base directory name.
+    # Figure out what that is and move the files to the correct destination
+    cd $PGSRC/$PGPROJECT
+    TGZPGROOTDIR=
+    for f in * ; do
+      if [ -d "$f" ] ; then
+        if [ -z "$TGZPGROOTDIR" ] ; then
+          TGZPGROOTDIR="$f"
+          echo "Extracted $PGVCS root directory is named $TGZPGROOTDIR"
+        else
+          echo "Warning:  unexpectedly found a second directory $f inside extracted tar file"
+        fi
+      else
+        echo "Ignoring non-directory $f extracted from tar file"
+        fi
+    done
+    if [ -f "$TGZPGROOTDIR/configure" ] ; then
+      mv $TGZPGROOTDIR/* $PGSRC/$PGPROJECT
+      rmdir $TGZPGROOTDIR
+    else
+      error 14 "Cannot determine subdirectory root for extracted tar file, needs a manual fix"
+    fi
+  fi
+}
+
+function extract_tgz {
+  # This will let you confirm that there's an acceptable tar file even
+  # you don't pass a project directory, which makes this call more like
+  # its git/cvs siblings.  Those let you nail down the repo details
+  # during "init" even without a project defined yet.
+  TARFILE=
+  cd $PGREPO/$PGVCS
+
+  for file in *.tar.gz ; do
+    if [ -z "$TARFILE" ] ; then
+      TARFILE="$file"
+    fi
+  done
+  
+  for file in *.tgz ; do
+    if [ -z "$TARFILE" ] ; then
+      TARFILE="$file"
+    fi
+  done
+  
+  if [ -n "$TARFILE" ] ; then
+    echo "Using $PGVCS repo source $PGREPO/$PGVCS/$TARFILE"
+    require_project
+    wrap extract_project_tgz
+  else
+    error 11 "For repo type $PGVCS cannot find a compatible .tar.gz or .tgz file"
+  fi
+}
+
+function setup_repo {
+  # Download/extract a repo in cases where that's what we want
+  if [ "$PGVCS" = "$CVSDIR" ]; then
+    pull_cvs
+  elif [ "$PGVCS" = "$GITDIR" ]; then
+    pull_git
+  elif [ "$PGVCS" = "$TGZDIR" ]; then
+    extract_tgz
+  else
+    error 3 "Setup cannot handle PGVCS=$PGVCS"
+  fi
+}
+
+function checkout_repo_git {
+  link_project_git
+  cd $PGSRC/$PGPROJECT
+  # TODO This will fail if this branch already exists.
+  git checkout -b $PGPROJECT
+}
+
+function checkout_repo_cvs {
+  cd $PGSRC
+  cvs co -d $PGPROJECT $CVSPGROOTDIR
+  update_cvs
+}
+
+function checkout_repo_tgz {
+  echo "No checkout step needed for PGVCS=$PGVCS"
+}
+
+function create_project {
+  if [ "$PGVCS" = "$CVSDIR" ]; then
+    checkout_repo_cvs
+  elif [ "$PGVCS" = "$GITDIR" ]; then
+    checkout_repo_git
+  elif [ "$PGVCS" = "$TGZDIR" ]; then
+    checkout_repo_tgz
+  else
+    error 3 "Create project cannot handle PGVCS=$PGVCS"
+  fi
+}
+
+function optional_project {
+  if [ -z "$PGPROJECT" ] ; then
+    error 6 "Command $COMMAND only partially completes without a PGPROJECT name"
+  fi
+}
+
+function require_project {
+  if [ -z "$PGPROJECT" ] ; then
+    error 7 "Command $COMMAND requires a PGPROJECT name"
+    usage
+  fi
+}
+
+function update_cvs {
+  cd $PGSRC/$PGPROJECT
+  cvs update -dP
+}
+
+function update_git {
+  # TODO Should this split fetch/merge steps based on whether
+  # a PGPROJECT name was passed or not?
+  cd $PGSRC/$PGPROJECT
+  git pull
+}
+
+function update_project {
+  if [ "$PGVCS" = "$CVSDIR" ]; then
+    update_cvs
+  elif [ "$PGVCS" = "$GITDIR" ]; then
+    update_git
+  elif [ "$PGVCS" = "$TGZDIR" ]; then
+    echo WARNING:  PGVCS=$PGVCS does not support being updated
+    return
+  else
+    error 4 "Update cannot handle PGVCS=$PGVCS"
+  fi
+}
+
+function require_binary {
+  # Check if initdb binary exists
+  if [ ! -x $PGBIN/initdb ]; then
+    error 7 "No PostgreSQL binaries found in $PGBIN"
+  fi
+}
+
+function build {
+  cd $PGSRC/$PGPROJECT
+  if [ -f GNUmakefile ] ; then
+    echo WARNING:  Build found an existing GNUmakefile, not running configure again
+  else
+    ./configure --prefix=$PGINST/$PGPROJECT --enable-depend $DEBUG
+  fi
+  # TODO Detect CPUs and set jobs accordingly
+  make -j 4 && make install
+}
+
+function initdb {
+  if [ ! -f "$PGDATA/PG_VERSION" ] ; then
+    $PGBIN/initdb -D $PGDATA  
+    if [ "$?" -ne "0" ]; then
+      error 9 "Error when running initdb, aborting"
+    fi  
+  else
+    echo Database cluster already exists in $PGDATA
+  fi
+}
+
+function set_port_str {
+  # If PGPORT is set to something, presume that's what port we should start
+  # the server on
+  if [ -n "$PGPORT" ] ; then
+    echo "Using discovered port $PGPORT"
+  else
+    PGPORT=5432
+  fi
+  PORTSTR="-o '-p $PGPORT'"
+}
+
+function start {
+  if [ -f "$PGDATA/postmaster.pid" ] ; then
+    echo "Server appears started:"
+    ls -l $PGDATA/postmaster.pid
+  else
+    # Do a basic sanity check before letting pg_ctl loose, since it
+    # will take a while to timeout even if there's database
+    if [ ! -f "$PGDATA/postgresql.conf" ] ; then
+      error 8 "Database cluster at $PGDATA looks incomplete:"
+    else
+      # We have a postgresql.conf but not a posmaster.pid, server should
+      # be setup to start normally
+      $PGBIN/pg_ctl start -D $PGDATA -l $PGLOG "$PORTSTR" -w 
+      tail $PGLOG
+    fi
+  fi
+}
+
+function stop {
+  if [ -f "$PGDATA/postmaster.pid" ] ; then
+    # TODO Add a more gradual shutdown behavior
+    $PGBIN/pg_ctl stop -D $PGDATA -m immediate 
+  else
+    echo "Server doesn't appear started"
+  fi
+}
+
+function add_user_db {
+  # psql by default wants to connect to a database with the same user
+  # as is running the program.  createdb will default to creating a user
+  # with the same name.  Might as well take advantage of that synergy.
+  
+  # TODO Only execute this if the database doesn't already exist
+  $PGBIN/createdb
+}
+
+function report_env {
+  # Mainly for debugging setup issues and the script itself
+  echo
+  echo "Base directories:"
+  echo PGWORK=$PGWORK
+  echo PGREPO=$PGREPO
+  echo PGSRC=$PGSRC
+  echo PGINST=$PGINST
+  echo
+  echo "Project specific directories (only if defined):"
+  echo PGBIN=$PGBIN
+  echo PGDATA=$PGDATA
+  echo PGLOG=$PGLOG
+  echo
+  # TODO Show whether we have a) binaries, b) a cluster, c) a running server
+}
+
+#
+# Environment and directory setup
+#
+
+# Try the following possibilities to locate the base of the structure we're looking for:
+# 1) The value passed for PGWORK
+# 2) The current directory
+# 3) $HOME/pgwork
+# 4) $HOME
+
+CWD=`pwd`
+if [ -n "$PGWORK" -a -d "$PGWORK" ] ; then
+  echo Using specified PGWORK=$PGWORK  
+elif [ -d "$CWD/$REPODIR" ] ; then
+  PGWORK="$CWD"
+  echo Using discovered PGWORK=$PGWORK
+elif [ -d "$HOME/pgwork" ] ; then
+  PGWORK="$HOME/pgwork"
+  echo Using discovered PGWORK=$PGWORK
+elif [ -d "$HOME/$REPODIR" ] ; then
+  PGWORK="$HOME"
+  echo Using discovered PGWORK=$PGWORK
+else
+  error 1 "Cannot find or guess a PGWORK base directory"
+fi
+
+# Now that we have a base directory, setup the rest of the
+# environment varibles we use in terms of it only if they
+# are not set already
+
+# These variables point to the base of the work area, without a project
+# name appended to them
+set_if_empty PGREPO "$PGWORK/$REPODIR"
+set_if_empty PGSRC "$PGWORK/$SRCDIR"
+set_if_empty PGINST "$PGWORK/$INSTDIR"
+
+# Save or restore project name
+wrap project_save
+
+# Thse variables are only set if there's a project name given
+if [ -z "$PGPROJECT" ] ; then
+  echo "Cannot set binary location or provide a new PGDATA without a project name"
+else
+  set_if_empty PGBIN "$PGINST/$PGPROJECT/bin"
+  set_if_empty PGDATA "$PGWORK/$DATADIR/$PGPROJECT"
+  set_if_empty PGLOG "$PGDATA/$LOGFILE"
+  set_port_str
+fi
+
+# In cases where we're not passed a PGVCS, or it appears invalid,
+# now that we know where the local repo is stored see if there's
+# already something there.  If so, determine PGVCS from it.
+# Default to grabbing from CVS if no source is specified and
+# there's nothing useful in the directory tree.
+
+if [ -n "$PGVCS" ] ; then
+  echo Using specified PGVCS=$PGVCS
+elif [ -d "$PGREPO/$TGZDIR" ] ; then
+  PGVCS=$TGZDIR
+  echo Using discovered PGVCS=$PGVCS
+elif [ -d "$PGREPO/$GITDIR" ] ; then
+  PGVCS=$GITDIR
+  echo Using discovered PGVCS=$PGVCS
+elif [ -d "$PGREPO/$CVSDIR" ] ; then
+  PGVCS=$CVSDIR
+  echo Using discovered PGVCS=$PGVCS
+else
+  PGVCS=$CVSDIR
+  echo Using default PGVCS=$PGVCS
+fi
+
+# Command interpreter
+
+# "init" and "update" will work without a project name.  The rest will not.
+# Each individual command here should be split into a function, because
+# some commands are just going to be composites of others.
+# the building blocks are:
+# -Grab/sync master repo (only one per structure here, shared)
+# -Create a new PGPROJECT structure
+# -Update the checked out code of a project.  Here the workflow for CVS and git are very different.
+# -Build the source code
+# -Create a database cluster
+# -Start the database
+
+# The only thing that really needs to get split out is that 
+# regularly I'd expect the checkout and build steps will
+# require applying a patch in the middle.  A special command might
+# make sense for the combination, with the normal workflow being
+# an init, manual patch application, then "start"
+
+if [ "$COMMAND" = "status" ] ; then
+  wrap report_env
+
+elif [ "$COMMAND" = "init" ] ; then
+  # Init will create a project if you give it one, otherwise
+  # it just sets up the repo
+  wrap setup
+  wrap setup_repo
+  wrap optional_project
+  wrap create_project
+
+elif [ "$COMMAND" = "update" ] ; then
+  # Update with no PGPROJECT name is OK, but not so useful for
+  # anything but CVS
+  wrap setup
+  wrap optional_project
+  wrap create_project
+  wrap update_project
+
+elif [ "$COMMAND" = "build-only" ] ; then
+  wrap require_project
+  wrap build
+  wrap require_binary
+  wrap initdb
+
+elif [ "$COMMAND" = "build" ] ; then
+  wrap require_project 
+  wrap build
+  wrap require_binary
+  wrap initdb
+  wrap start
+  wrap add_user_db
+
+elif [ "$COMMAND" = "initdb" ] ; then
+  # Explicitly calling initdb suggests the caller wants to adjust the
+  # postgresql.conf before starting
+  wrap require_project
+  wrap require_binary
+  wrap initdb
+
+elif [ "$COMMAND" = "switch" ] ; then
+  wrap require_project
+  wrap require_binary
+  wrap start
+  wrap add_user_db
+
+elif [ "$COMMAND" = "start" ] ; then
+  wrap require_project
+  wrap require_binary
+  wrap initdb
+  wrap start
+  wrap add_user_db
+
+elif [ "$COMMAND" = "stop" ] ; then
+  wrap require_project
+  wrap require_binary
+  wrap stop
+
+else
+  error 5 "Command not recognized:  $COMMAND"
+  usage
+fi
+
+# We only want to export settings if we're given a project name
+wrap require_project
+
+# Only export things if we didn't raise an error, as not
+# to pollute the caller's environment with garbage.
+if [ -z "$ERROR" ]; then
+  # Export the bits we expect the user to directly reference
+  export PGDATA PGLOG
+  # TODO Don't dupe PGBIN if it's already in the PATH
+  export PATH="$PGBIN:$PATH"
+
+  alias start="$PGBIN/pg_ctl -D $PGDATA -l $PGLOG start"
+  alias stop="$PGBIN/pg_ctl -D $PGDATA stop -m fast"
+  alias immediate="$PGBIN/bin/pg_ctl -D $PGDATA stop -m immediate"
+
+  # Use bash black magic to pass an exit code back in a way that
+  # won't exit the calling shell script.  See
+  # http://fvue.nl/wiki/Bash:_Return_or_exit%3F for background.
+  $(exit 0)
+else
+  $(exit $ERROR)
+fi
+
