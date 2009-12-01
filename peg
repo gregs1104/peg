@@ -123,7 +123,7 @@ function project_save {
 function setup {
   mkdir -p $PGWORK $PGREPO $PGSRC $PGINST $PGREPO/$PGVCS
   if [ -n "$PGPROJECT" ] ; then
-    mkdir -p $PGSRC/$PGPROJECT $PGDATA $PGBIN
+    mkdir -p $PGSRC/$PGPROJECT $PGDATA $PGENGINE
   fi
 }
 
@@ -323,8 +323,8 @@ function update_project {
 
 function require_binary {
   # Check if initdb binary exists
-  if [ ! -x $PGBIN/initdb ]; then
-    error 7 "No PostgreSQL binaries found in $PGBIN"
+  if [ ! -x $PGENGINE/initdb ]; then
+    error 7 "No PostgreSQL binaries found in $PGENGINE"
   fi
 }
 
@@ -333,7 +333,7 @@ function build {
   if [ -f GNUmakefile ] ; then
     echo WARNING:  Build found an existing GNUmakefile, not running configure again
   else
-    ./configure --prefix=$PGINST/$PGPROJECT --enable-depend $DEBUG
+    ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $DEBUG
   fi
   # TODO Detect CPUs and set jobs accordingly
   make -j 4 && make install
@@ -341,7 +341,7 @@ function build {
 
 function initdb {
   if [ ! -f "$PGDATA/PG_VERSION" ] ; then
-    $PGBIN/initdb -D $PGDATA  
+    $PGENGINE/initdb -D $PGDATA  
     if [ "$?" -ne "0" ]; then
       error 9 "Error when running initdb, aborting"
     fi  
@@ -373,7 +373,7 @@ function start {
     else
       # We have a postgresql.conf but not a posmaster.pid, server should
       # be setup to start normally
-      $PGBIN/pg_ctl start -D $PGDATA -l $PGLOG "$PORTSTR" -w 
+      $PGENGINE/pg_ctl start -D $PGDATA -l $PGLOG "$PORTSTR" -w 
       tail $PGLOG
     fi
   fi
@@ -382,7 +382,7 @@ function start {
 function stop {
   if [ -f "$PGDATA/postmaster.pid" ] ; then
     # TODO Add a more gradual shutdown behavior
-    $PGBIN/pg_ctl stop -D $PGDATA -m immediate 
+    $PGENGINE/pg_ctl stop -D $PGDATA -m immediate 
   else
     echo "Server doesn't appear started"
   fi
@@ -394,7 +394,7 @@ function add_user_db {
   # with the same name.  Might as well take advantage of that synergy.
   
   # TODO Only execute this if the database doesn't already exist
-  $PGBIN/createdb
+  $PGENGINE/createdb
 }
 
 function report_env {
@@ -407,7 +407,7 @@ function report_env {
   echo PGINST=$PGINST
   echo
   echo "Project specific directories (only if defined):"
-  echo PGBIN=$PGBIN
+  echo PGENGINE=$PGENGINE
   echo PGDATA=$PGDATA
   echo PGLOG=$PGLOG
   echo
@@ -457,7 +457,7 @@ wrap project_save
 if [ -z "$PGPROJECT" ] ; then
   echo "Cannot set binary location or provide a new PGDATA without a project name"
 else
-  set_if_empty PGBIN "$PGINST/$PGPROJECT/bin"
+  set_if_empty PGENGINE "$PGINST/$PGPROJECT/bin"
   set_if_empty PGDATA "$PGWORK/$DATADIR/$PGPROJECT"
   set_if_empty PGLOG "$PGDATA/$LOGFILE"
   set_port_str
@@ -575,12 +575,12 @@ wrap require_project
 if [ -z "$ERROR" ]; then
   # Export the bits we expect the user to directly reference
   export PGDATA PGLOG
-  # TODO Don't dupe PGBIN if it's already in the PATH
-  export PATH="$PGBIN:$PATH"
+  # TODO Don't dupe PGENGINE if it's already in the PATH
+  export PATH="$PGENGINE:$PATH"
 
-  alias start="$PGBIN/pg_ctl -D $PGDATA -l $PGLOG start"
-  alias stop="$PGBIN/pg_ctl -D $PGDATA stop -m fast"
-  alias immediate="$PGBIN/bin/pg_ctl -D $PGDATA stop -m immediate"
+  alias start="$PGENGINE/pg_ctl -D $PGDATA -l $PGLOG start"
+  alias stop="$PGENGINE/pg_ctl -D $PGDATA stop -m fast"
+  alias immediate="$PGENGINE/bin/pg_ctl -D $PGDATA stop -m immediate"
 
   # Use bash black magic to pass an exit code back in a way that
   # won't exit the calling shell script.  See
