@@ -333,7 +333,7 @@ function build {
   if [ -f GNUmakefile ] ; then
     echo WARNING:  Build found an existing GNUmakefile, not running configure again
   else
-    ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $DEBUG
+    ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $PGDEBUG
   fi
   # TODO Detect CPUs and set jobs accordingly
   make -j 4 && make install
