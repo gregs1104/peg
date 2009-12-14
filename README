@@ -261,6 +261,7 @@ The following subcommands are accepted by peg:
  * switch:  Switch to an existing built binary set and cluster
  * start:  Start a cluster
  * stop:  Stop a cluster
+ * rm:  Remove all data from a project (but not the repo)
 
 Shortcuts
 =========

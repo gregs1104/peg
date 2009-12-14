@@ -41,6 +41,7 @@ echo initdb:  Create a cluster
 echo switch:  Switch to an existing built binary set and cluster
 echo start:  Start a cluster
 echo stop:  Stop a cluster
+echo rm:  Remove all data from a project (but not the repo)
 }
 
 # Set $1 to $2 only if it's empty
@@ -282,6 +283,15 @@ function create_project {
     error 3 "Create project cannot handle PGVCS=$PGVCS"
   fi
 }
+
+function remove_project {
+  # TODO
+  # The tricky part here is that we want to cleanup things like PGDATA only
+  # if that points to a PEG-managed directory tree, *not* if the user supplied
+  # their own PGDATA.  
+  error 15 "Project rm not implemented yet"
+}
+
 
 function optional_project {
   if [ -z "$PGPROJECT" ] ; then
@@ -561,6 +571,10 @@ elif [ "$COMMAND" = "stop" ] ; then
   wrap require_project
   wrap require_binary
   wrap stop
+
+elif [ "$COMMAND" = "rm" ] ; then
+  wrap require_project
+  wrap remove_project
 
 else
   error 5 "Command not recognized:  $COMMAND"

@@ -334,8 +334,16 @@ operate on, which right now is always a project name.</p>
 <div class="section" id="installation">
 <h1>Installation</h1>
 <p>peg is so far a single script that doesn't rely on anything else.  You
-can just it to any directory that's in your path, such as /usr/local/bin
-for a system-wide install.</p>
+can just copy or link it to any directory that's in your path, such
+as /usr/local/bin for a system-wide install.  Here's a sample
+installation that checks out a working copy and then
+links to that copy in a standard directory found in the PATH
+on Linux systems:</p>
+<pre class="literal-block">
+$ cd $HOME
+$ git clone git://github.com/gregs1104/peg.git
+$ sudo ln -s $HOME/peg/peg /usr/local/bin/
+</pre>
 </div>
 <div class="section" id="directory-layout">
 <h1>Directory layout</h1>
@@ -532,6 +540,7 @@ database configuration before you start it.</li>
 <li>switch:  Switch to an existing built binary set and cluster</li>
 <li>start:  Start a cluster</li>
 <li>stop:  Stop a cluster</li>
+<li>rm:  Remove all data from a project (but not the repo)</li>
 </ul>
 </blockquote>
 </div>
