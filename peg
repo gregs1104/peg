@@ -41,7 +41,7 @@ echo initdb:  Create a cluster
 echo switch:  Switch to an existing built binary set and cluster
 echo start:  Start a cluster
 echo stop:  Stop a cluster
-echo rm:  Remove all data from a project (but not the repo)
+echo "rm:  Remove all data from a project (but not the repo)"
 }
 
 # Set $1 to $2 only if it's empty
