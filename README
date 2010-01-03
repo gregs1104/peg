@@ -25,10 +25,10 @@ mirrors the environment setups of two common PostgreSQL setups:
    this file, and therefore have the exact same settings used to start
    the server.
    
-The idea is that once you've setup and environment with peg, the environment
+The idea is that once you've setup an environment with peg, the environment
 variables you'll have available to you will match what you'd get if you
 were logging into a production RHEL server running the standard PostgreSQL
-RPM set.  Once peg as setup your environment, commands like the following
+RPM set.  Once peg has setup your environment, commands like the following
 will work, exactly the same as if you'd sourced the sysconfig file on
 a production RHEL server::
 
@@ -256,7 +256,7 @@ The following subcommands are accepted by peg:
  * build-only:  Execute the build steps and create a database cluster, but
    don't start it.  This is typically for if you know you need to modify the
    database configuration before you start it.
- * build:  Build binaries, install them, create a cluster, start the databas
+ * build:  Build binaries, install them, create a cluster, start the database
  * initdb:  Create a cluster
  * switch:  Switch to an existing built binary set and cluster
  * start:  Start a cluster
