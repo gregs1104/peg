@@ -21,6 +21,9 @@
 # make debugging easier
 #set -x
 
+# configure stuff
+MAKE=/usr/sfw/bin/gmake
+
 function usage {
 echo peg takes subcommands followed by a project name.  Available
 echo subcommands are:
@@ -346,7 +349,7 @@ function build {
     ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety --without-readline --with-libedit-preferred $PGDEBUG
   fi
   # TODO Detect CPUs and set jobs accordingly
-  make -j 4 && make install
+  $MAKE -j 4 && $MAKE install
 }
 
 function initdb {
