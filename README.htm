@@ -314,10 +314,10 @@ this file, and therefore have the exact same settings used to start
 the server.</li>
 </ul>
 </blockquote>
-<p>The idea is that once you've setup and environment with peg, the environment
+<p>The idea is that once you've setup an environment with peg, the environment
 variables you'll have available to you will match what you'd get if you
 were logging into a production RHEL server running the standard PostgreSQL
-RPM set.  Once peg as setup your environment, commands like the following
+RPM set.  Once peg has setup your environment, commands like the following
 will work, exactly the same as if you'd sourced the sysconfig file on
 a production RHEL server:</p>
 <pre class="literal-block">
@@ -535,7 +535,7 @@ to execute a command.  Useful mainly for troubleshooting.</li>
 <li>build-only:  Execute the build steps and create a database cluster, but
 don't start it.  This is typically for if you know you need to modify the
 database configuration before you start it.</li>
-<li>build:  Build binaries, install them, create a cluster, start the databas</li>
+<li>build:  Build binaries, install them, create a cluster, start the database</li>
 <li>initdb:  Create a cluster</li>
 <li>switch:  Switch to an existing built binary set and cluster</li>
 <li>start:  Start a cluster</li>
@@ -604,11 +604,26 @@ doing anything.  A space works for this, for example:</p>
 export PGDEBUG=&quot; &quot;
 </pre>
 </li>
+<li><p class="first">PGMAKE:  Program to run GNU make.  This defaults to &quot;make&quot; but can be
+overridden.</p>
+</li>
 </ul>
 </blockquote>
 </div>
+<div class="section" id="solaris-use">
+<h1>Solaris Use</h1>
+<p>The defaults for peg are known to have issues building on a typical Solaris
+system, where the GNU building toolchain is not necessarily the default one.
+Here's a sample configuration you can put into your environment to change
+the defaults to work on that platform, assuming you've installed the
+Sun Freeware GNU tools in their default location:</p>
+<pre class="literal-block">
+export PGMAKE=&quot;/usr/sfw/bin/gmake&quot;
+export PGDEBUG=&quot;--enable-cassert --enable-debug --without-readline --with-libedit-preferred&quot;
+</pre>
+</div>
 <div class="section" id="known-issues">
-<h1>Known issues</h1>
+<h1>Known Issues</h1>
 <p>See TODO notes in the peg source code (and even this documentation) for the
 open issues in the code.  Some of the rougher edges right now:</p>
 <blockquote>

@@ -21,9 +21,6 @@
 # make debugging easier
 #set -x
 
-# configure stuff
-MAKE=/usr/sfw/bin/gmake
-
 function usage {
 echo peg takes subcommands followed by a project name.  Available
 echo subcommands are:
@@ -57,6 +54,7 @@ function set_if_empty {
 
 COMMAND="$1"
 set_if_empty PGPROJECT "$2"
+set_if_empty PGMAKE "make"
 # Typically if you're overriding this, you'll want to set PGDEBUG to
 # something harmless but not empty; a space would do.
 set_if_empty PGDEBUG "--enable-cassert --enable-debug"
@@ -346,10 +344,10 @@ function build {
   if [ -f GNUmakefile ] ; then
     echo WARNING:  Build found an existing GNUmakefile, not running configure again
   else
-    ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety --without-readline --with-libedit-preferred $PGDEBUG
+    ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $PGDEBUG
   fi
   # TODO Detect CPUs and set jobs accordingly
-  $MAKE -j 4 && $MAKE install
+  $PGMAKE -j 4 && $MAKE install
 }
 
 function initdb {

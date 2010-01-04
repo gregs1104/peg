@@ -318,7 +318,22 @@ points to a separate location where you want your database to go.
    
      export PGDEBUG=" "  
 
-Known issues
+ * PGMAKE:  Program to run GNU make.  This defaults to "make" but can be
+   overridden.
+
+Solaris Use
+===========
+
+The defaults for peg are known to have issues building on a typical Solaris
+system, where the GNU building toolchain is not necessarily the default one.
+Here's a sample configuration you can put into your environment to change
+the defaults to work on that platform, assuming you've installed the
+Sun Freeware GNU tools in their default location::
+
+  export PGMAKE="/usr/sfw/bin/gmake"
+  export PGDEBUG="--enable-cassert --enable-debug --without-readline --with-libedit-preferred"
+
+Known Issues
 ============
 
 See TODO notes in the peg source code (and even this documentation) for the
