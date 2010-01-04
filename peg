@@ -410,14 +410,14 @@ function add_user_db {
 
 function report_env {
   # Mainly for debugging setup issues and the script itself
-  echo "Active Project:"  
-  echo PGPROJECT=$PGPROJECT 
-  echo
   echo "Base directories:"
   echo PGWORK=$PGWORK
   echo PGREPO=$PGREPO
   echo PGSRC=$PGSRC
   echo PGINST=$PGINST
+  echo
+  echo "Active Project:"  
+  echo PGPROJECT=$PGPROJECT 
   echo
   echo "Project specific directories (only if defined):"
   echo PGENGINE=$PGENGINE
