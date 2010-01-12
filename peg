@@ -347,7 +347,7 @@ function build {
     ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $PGDEBUG
   fi
   # TODO Detect CPUs and set jobs accordingly
-  $PGMAKE -j 4 && $MAKE install
+  $PGMAKE -j 4 && $PGMAKE install
 }
 
 function initdb {
