@@ -167,8 +167,14 @@ PGVCS to be git:
 At this point your sole git repository will be switched to a new branch that
 matches the name of the project.
 
-TODO You can probably force this just by creating a repo/git directory too.
-Need to document that logic.
+You can easily force this just by creating a repo/git directory too::
+
+  cd
+  mkdir -p pgwork/repo/git
+  peg init test
+  . peg build
+  psql
+
 
 git repo with patch
 ~~~~~~~~~~~~~~~~~~~
@@ -181,7 +187,13 @@ Here's how you might test a patch using git for the base repo::
   . peg build
   psql
 
-TODO:  Test the above
+Some patches aren't handled by git's apply.  If that fails with errors,
+try the following instead::
+
+  patch -p1 < some.patch
+
+The parameter passed to "-p" in this case can vary; 0 is also common.
+You'll need to be able to read the patch to predict what it should be.
 
 Sample two-cluster session
 ==========================
