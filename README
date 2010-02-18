@@ -349,7 +349,28 @@ Known Issues
 ============
 
 See TODO notes in the peg source code (and even this documentation) for the
-open issues in the code.  Some of the rougher edges right now:
+open issues in the code.  A few of these turn into functional issues you
+should be aware of.
+
+Serious problems
+~~~~~~~~~~~~~~~~
+
+ * peg has a notion that you might set PGDATA directly, rather than want that
+   particular directory structure to be in the same PGWORK area everything
+   else is at.  And when you source peg into your environment to use
+   a project, this sets PGDATA.  This combination causes a major issue
+   when switching projects that are in fact both hosted in the PGWORK
+   structure.  You'll get the PGDATA from the original project, and the
+   one you're switching to will believe that's a manually set PGDATA it
+   should use.  So everything else will switch to the new project,
+   except the database directory, which is confusing.  This problem
+   will eventually be addressed in the code, too work around
+   it for now, before doing "peg switch" you should erase PGDATA::
+
+     unset PGDATA
+
+Trivial bugs
+~~~~~~~~~~~~
 
  * peg creates a database matching your name, which is what psql wants for a
    default.  It doesn't check whether it already exist first though, so you'll

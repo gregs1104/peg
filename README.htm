@@ -447,8 +447,14 @@ psql</p>
 </blockquote>
 <p>At this point your sole git repository will be switched to a new branch that
 matches the name of the project.</p>
-<p>TODO You can probably force this just by creating a repo/git directory too.
-Need to document that logic.</p>
+<p>You can easily force this just by creating a repo/git directory too:</p>
+<pre class="literal-block">
+cd
+mkdir -p pgwork/repo/git
+peg init test
+. peg build
+psql
+</pre>
 <div class="section" id="git-repo-with-patch">
 <h2>git repo with patch</h2>
 <p>Here's how you might test a patch using git for the base repo:</p>
@@ -459,7 +465,13 @@ git apply some.patch
 . peg build
 psql
 </pre>
-<p>TODO:  Test the above</p>
+<p>Some patches aren't handled by git's apply.  If that fails with errors,
+try the following instead:</p>
+<pre class="literal-block">
+patch -p1 &lt; some.patch
+</pre>
+<p>The parameter passed to &quot;-p&quot; in this case can vary; 0 is also common.
+You'll need to be able to read the patch to predict what it should be.</p>
 </div>
 </div>
 <div class="section" id="sample-two-cluster-session">
@@ -625,7 +637,32 @@ export PGDEBUG=&quot;--enable-cassert --enable-debug --without-readline --with-l
 <div class="section" id="known-issues">
 <h1>Known Issues</h1>
 <p>See TODO notes in the peg source code (and even this documentation) for the
-open issues in the code.  Some of the rougher edges right now:</p>
+open issues in the code.  A few of these turn into functional issues you
+should be aware of.</p>
+<div class="section" id="serious-problems">
+<h2>Serious problems</h2>
+<blockquote>
+<ul>
+<li><p class="first">peg has a notion that you might set PGDATA directly, rather than want that
+particular directory structure to be in the same PGWORK area everything
+else is at.  And when you source peg into your environment to use
+a project, this sets PGDATA.  This combination causes a major issue
+when switching projects that are in fact both hosted in the PGWORK
+structure.  You'll get the PGDATA from the original project, and the
+one you're switching to will believe that's a manually set PGDATA it
+should use.  So everything else will switch to the new project,
+except the database directory, which is confusing.  This problem
+will eventually be addressed in the code, too work around
+it for now, before doing &quot;peg switch&quot; you should erase PGDATA:</p>
+<pre class="literal-block">
+unset PGDATA
+</pre>
+</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="trivial-bugs">
+<h2>Trivial bugs</h2>
 <blockquote>
 <ul class="simple">
 <li>peg creates a database matching your name, which is what psql wants for a
@@ -636,6 +673,7 @@ multiple pointers to the same directory tree.  This is mostly harmless, just
 slowing down how fast commands can be found in your PATH a bit.</li>
 </ul>
 </blockquote>
+</div>
 </div>
 <div class="section" id="credits">
 <h1>Credits</h1>

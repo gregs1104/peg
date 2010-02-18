@@ -156,7 +156,6 @@ function link_project_git
 }
 
 function pull_git {
-  GITROOT=$PGREPO/$PGVCS
   cd $GITROOT
   if [ -d "$GITPGROOTDIR/.git" ] ; then
     # Apparently we already have a repo around
@@ -285,14 +284,37 @@ function create_project {
   fi
 }
 
-function remove_project {
-  # TODO
-  # The tricky part here is that we want to cleanup things like PGDATA only
-  # if that points to a PEG-managed directory tree, *not* if the user supplied
-  # their own PGDATA.  
-  error 15 "Project rm not implemented yet"
+function rm_if_exists {
+  if [ -d "$1" ] ; then
+    echo Erasing directory $1 
+    rm -rf "$1"
+  else
+    echo Not removing directory $1 because it does not exist
+  fi
 }
 
+function remove_project {
+  # This might be more than the user wants, but if we just removed a project
+  # and this is a git repo, odds are decent the repo directory is filled with
+  # that project's build artifacts.  Get rid of those to be safe.
+  if [ "$PGVCS" = "$GITDIR" ]; then
+    GITBASE="$GITROOT/$GITPGROOTDIR"
+    echo Cleaning out all build artifacts from the git repo at $GITBASE
+    pushd $GITBASE
+    make distclean
+    popd
+    echo distclean of repo directory $GITBASE finished
+  fi
+
+  # The tricky part here is that we want to cleanup things like PGDATA only
+  # if that points to a PEG-managed directory tree, *not* if the user supplied
+  # their own PGDATA.  For now we just work around this by only deleting
+  # the standard PGDATA for a PEG-managed project, not whatever PGDATA
+  # is actually pointing to.
+  rm_if_exists "$PGWORK/$DATADIR/$PGPROJECT"
+  rm_if_exists "$PGINST/$PGPROJECT"
+  rm_if_exists "$PGSRC/$PGPROJECT"
+}
 
 function optional_project {
   if [ -z "$PGPROJECT" ] ; then
@@ -497,6 +519,8 @@ else
   PGVCS=$CVSDIR
   echo Using default PGVCS=$PGVCS
 fi
+
+GITROOT="$PGREPO/$PGVCS"
 
 # Command interpreter
 
