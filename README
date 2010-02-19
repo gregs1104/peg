@@ -21,7 +21,7 @@ mirrors the environment setups of two common PostgreSQL setups:
  * The RPM packaging used by RedHat's PostgreSQL server uses a sourced
    environment stored in /etc/sysconfig/postgresql/postgresql which defines
    PGDATA.  One useful idiom when working with postgresql is to have the
-   login profile of the postresql user and others using Postgres to source
+   login profile of the postgres user and others using Postgres to source
    this file, and therefore have the exact same settings used to start
    the server.
    
@@ -222,11 +222,11 @@ to script, using peg to do most of the dirty work normally required here::
   peg build master
   # Can't source the above yet, because then PGDATA will be set
   # Start the slave
-  PGPORT=5434 ; peg start slave ; PGPORT=
+  export PGPORT=5433 ; peg start slave ; export PGPORT=
   . peg switch master
 
-  psql
-  psql -p 5434
+  psql -p 5432 -c "show data_directory"
+  psql -p 5433 -c "show data_directory"
 
 Note that if you now try to stop the slave like this::
 
@@ -235,10 +235,12 @@ Note that if you now try to stop the slave like this::
 This won't actually work, because it will be still using the PGDATA
 environment variable you sourced in.  Instead you need to do this::
 
+  unset PGDATA PGLOG
   . peg switch slave
   peg stop
 
-TODO:  Test that last part
+TODO:  The above still doesn't work.  But if you start a whole new shell,
+that seems to be fine.
 
 Base directory detection
 ========================
@@ -365,9 +367,10 @@ Serious problems
    should use.  So everything else will switch to the new project,
    except the database directory, which is confusing.  This problem
    will eventually be addressed in the code, too work around
-   it for now, before doing "peg switch" you should erase PGDATA::
+   it for now, before doing "peg switch" you should erase PGDATA (and PGLOG,
+   which suffers from the same issue)::
 
-     unset PGDATA
+     unset PGDATA PGLOG
 
 Trivial bugs
 ~~~~~~~~~~~~
