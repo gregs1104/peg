@@ -301,7 +301,7 @@ function remove_project {
     GITBASE="$GITROOT/$GITPGROOTDIR"
     echo Cleaning out all build artifacts from the git repo at $GITBASE
     pushd $GITBASE
-    make distclean
+    make maintainer-clean
     popd
     echo distclean of repo directory $GITBASE finished
   fi
