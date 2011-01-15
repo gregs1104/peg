@@ -119,6 +119,10 @@ build steps, you can remove the symlink and manually copy the master repo.
 
 TODO:  Provide an example of that
 
+If you intend to work on multiple projects using a single git repo, make
+sure you note the "Serious problems" section below for caveats about
+common issues there.
+
 Sample tgz session
 ==================
 
@@ -357,6 +361,26 @@ should be aware of.
 Serious problems
 ~~~~~~~~~~~~~~~~
 
+So far these are serious only in the sense that you are likely to run into
+them and the problems they cause are annoying.  But the workarounds to avoid
+each are pretty simple.
+
+* If you are running against a project, then create a new one, it's quite
+  easy to get into a state where environment variables and other information
+  set by the old project continue to linger around.  If you're using a git
+  repo for the code, this is particularly likely to happen because
+  switching projects only switches branches in the single shared checkout
+  of the repo.  That doesn't remove the parts of the source code build
+  configuration that refer to the old project:  the ``configure`` stage
+  saves where the binaries are going to be stored at for example.
+  The suggested workflow when using git is therefore::
+
+     peg clean
+     peg init newproject
+     [start a new terminal session to clear all environment variables]
+     peg build
+     . peg switch
+
  * peg has a notion that you might set PGDATA directly, rather than want that
    particular directory structure to be in the same PGWORK area everything
    else is at.  And when you source peg into your environment to use
@@ -366,7 +390,7 @@ Serious problems
    one you're switching to will believe that's a manually set PGDATA it
    should use.  So everything else will switch to the new project,
    except the database directory, which is confusing.  This problem
-   will eventually be addressed in the code, too work around
+   will eventually be addressed in the code.  To work around
    it for now, before doing "peg switch" you should erase PGDATA (and PGLOG,
    which suffers from the same issue)::
 

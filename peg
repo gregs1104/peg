@@ -42,6 +42,7 @@ echo switch:  Switch to an existing built binary set and cluster
 echo start:  Start a cluster
 echo stop:  Stop a cluster
 echo "rm:  Remove all data from a project (but not the repo)"
+echo "clean:  Clean up the source code tree ('make maintainer-clean')"
 }
 
 # Set $1 to $2 only if it's empty
@@ -293,6 +294,18 @@ function rm_if_exists {
   fi
 }
 
+function clean_project {
+  if [ -d "$PGSRC/$PGPROJECT" ] ; then
+    echo Cleaning out source code tree at $PGSRC/$PGPROJECT
+    pushd $PGSRC/$PGPROJECT
+    make maintainer-clean
+    popd
+    echo maintainer-clean of source directory $PGSRC/$PRPROJECT finished
+  else
+    echo Not cleaning up $PGSRC/$PGPROJECT because it does not exist
+  fi
+}
+
 function remove_project {
   # This might be more than the user wants, but if we just removed a project
   # and this is a git repo, odds are decent the repo directory is filled with
@@ -303,7 +316,7 @@ function remove_project {
     pushd $GITBASE
     make maintainer-clean
     popd
-    echo distclean of repo directory $GITBASE finished
+    echo maintainer-clean of repo directory $GITBASE finished
   fi
 
   # The tricky part here is that we want to cleanup things like PGDATA only
@@ -602,6 +615,10 @@ elif [ "$COMMAND" = "stop" ] ; then
 elif [ "$COMMAND" = "rm" ] ; then
   wrap require_project
   wrap remove_project
+
+elif [ "$COMMAND" = "clean" ] ; then
+  wrap require_project
+  wrap clean_project
 
 else
   error 5 "Command not recognized:  $COMMAND"
