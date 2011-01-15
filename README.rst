@@ -375,6 +375,7 @@ each are pretty simple.
   saves where the binaries are going to be stored at for example.
   The suggested workflow when using git is therefore::
 
+     stop
      peg clean
      peg init newproject
      [start a new terminal session to clear all environment variables]
@@ -406,10 +407,26 @@ Trivial bugs
    multiple pointers to the same directory tree.  This is mostly harmless, just
    slowing down how fast commands can be found in your PATH a bit.
 
+Documentation
+=============
+
+The documentation ``README.rst`` for the program is in ReST markup.  Tools
+that operate on ReST can be used to make versions of it formatted
+for other purposes, such as rst2html to make a HTML version.
+
+Contact
+=======
+
+The project is hosted at http://github.com/gregs1104/peg
+
+If you have any hints, changes or improvements, please contact:
+
+ * Greg Smith gsmith@gregsmith.com
+
 Credits
 =======
 
-Copyright (c) 2009, Gregory Smith
+Copyright (c) 2009-2011, Gregory Smith
 All rights reserved.
 See COPYRIGHT file for full license details
 
