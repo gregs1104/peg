@@ -157,7 +157,7 @@ Sample git session
 ==================
 
 You can clone the postgresql.org git repo just by changing your default
-PGVCS to be git:
+PGVCS to be git::
 
   cd
   mkdir -p pgwork
