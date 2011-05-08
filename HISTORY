@@ -1,3 +1,4 @@
 0.1 2009-11-19 First public release
     2010-01-04 Merged Solaris fixes from Robert Treat
     2011-01-15 Add "clean" command and improve documentation
+    2011-05-08 Switch to git as default repo, more doc updates

@@ -4,9 +4,10 @@ What is peg?
 peg stands for PostgreSQL Environment Generator.  It's a fairly complicated
 script that automates most of the repetitive work required to install test
 instances of PostgreSQL.  It's primarily aimed at developers who are building
-from source control (cvs, git) and toward reviewers who are trying out a
+from source control (git, cvs) and toward reviewers who are trying out a
 source code package (.tar.gz), including release source snapshots and the
-alpha/beta builds.
+alpha/beta builds.  It works on UNIX-like systems that already have
+the rest of the build tools necessary for compiling PostgreSQL installed.
 
 Motivation
 ==========
@@ -38,7 +39,7 @@ a production RHEL server::
 TODO:  Show a sample RHEL sysconfig script for comparison sake
 
 Whether or not you find that useful, you'll also get source code builds and
-cluster creation, setup, and control automated as well by using peg.
+cluster creation, setup, and control automated by using peg.
 
 peg takes commands similarly to common version control systems:  you call
 the one executable script with a subcommand, followed by what you want it to
@@ -58,32 +59,33 @@ on Linux systems::
   $ git clone git://github.com/gregs1104/peg.git
   $ sudo ln -s $HOME/peg/peg /usr/local/bin/
 
+Creating a first project
+========================
+
+The easiest way to make peg work is to create a $HOME/pgwork directory and
+let peg manage the whole thing for you::
+
+  # git repo setup example
+  cd
+  mkdir -p pgwork
+  peg init test
+  . peg build
+  psql
+
+At this point your sole git repository will be switched to a new branch that
+matches the name of the project.
+
 Directory layout
-================
+----------------
 
 peg assumes you are installing your Postgres database as a regular user,
 typically in your home directory.  It allows you have to multiple "projects"
 installed in this structure, each of which gets its own source code, binaries,
 and database.
 
-The easiest way to make peg work is to create a $HOME/pgwork directory and
-let peg manage the whole thing for you::
-
-  cd
-  mkdir -p pgwork
-  # Repo setup:  CVS
-  peg init test
-  . peg build
-  psql
-
-This will synchronize with the master PostgreSQL CVS servers via rsync, using
-the same techniques documented at
-http://wiki.postgresql.org/wiki/Working_with_CVS
-(The outline given in its "Initial setup" section is actually peg's distant
-ancestor)
-
-This will get you a directory tree that looks like this (this is simplified to
-only include the basic outline, there will be more in there)::
+The example above will get you a directory tree that looks like this
+(this is simplified to only include the basic outline, there will be
+more directories below these)::
 
   pgwork/
   |-- data
@@ -92,7 +94,7 @@ only include the basic outline, there will be more in there)::
   |   `-- test
   |       `-- bin
   |-- repo
-  |   `-- cvs
+  |   `-- git
   `-- src
       `-- test
 
@@ -107,8 +109,51 @@ The top level directories are intended to work like this:
  * pgwork/inst/project:  Binaries build by the "make install" step
  * pgwork/data/project:  Hold the database cluster created by initdb
 
+Shortcuts
+---------
+
+Once you've gotten an environment setup, using it again can be as easy as::
+
+  . peg switch
+  
+That will use whatever project name you last gave the script and start the
+server up.  If you shutdown your system, that should be all that's needed
+to bring things back up again.
+
+When you source the peg script, along with getting settings like PGDATA
+available it also creates a couple of quick aliases you can use instead
+of calling peg for those functions:
+
+ * start:  If you already have a database cluster setup, start it
+ * stop:  Stop a running database with the slow shutdown code
+ * immediate:  Stop a running database immediately
+
+Here again, the names were picked to be similar to the 
+"service postgresql start" and stop commands used by the RPM packaging.
+start and stop are used on some UNIX systems for job control or system
+initialization.  It's unlikely you'll need those while doing PostgreSQL
+work too, so re-using those commands for this should save you some typing.
+
+Use peg for performance testing
+-------------------------------
+
+The default build method used by peg includes assertions, which will
+slow down the speed of the resulting server code considerably.  If you
+want to build without assertions and debugging information, you'll need
+to set PGDEBUG to a non-empty value.  That will be passed through to
+the PostgreSQL "configure" program without turning on any of the
+debugging features.  A space works for this, for example:: 
+   
+  export PGDEBUG=" "  
+
+Before the build step will use the standard build options, rather than
+the debugging ones that slow the server down.
+
+peg with git details
+====================
+ 
 Source code layout for git
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 If you are using git for your repo, the src/ directory is just a symbolic link
 to the repo itself, so that every project shares the same repo.  Each project
@@ -123,65 +168,8 @@ If you intend to work on multiple projects using a single git repo, make
 sure you note the "Serious problems" section below for caveats about
 common issues there.
 
-Sample tgz session
-==================
-
-Here's how you might use peg to test out an alpha build downloaded in source
-code form.  To do that instead of using a regular repo, you merely need to
-create a tgz repo directory and drop the file into there::
-
-  # Repo setup:  tgz
-  cd
-  mkdir -p pgwork/repo/tgz
-  cp postgresql-8.5alpha2.tar.gz pgwork/repo/tgz
-
-  # Basic install
-  peg init test
-  . peg build
-  psql
-
-cvs or tgz repo with patch
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here's how you might test a patch using CVS for the base repo::
-
-  peg init test
-  cd pgwork/src/test
-  patch -p 0 < some.patch
-  . peg build
-  psql
-
-TODO:  Test the above
-
-Sample git session
-==================
-
-You can clone the postgresql.org git repo just by changing your default
-PGVCS to be git::
-
-  cd
-  mkdir -p pgwork
-
-  # Repo setup:  git
-  export PGVCS=git
-  peg init test
-  . peg build
-  psql
-
-At this point your sole git repository will be switched to a new branch that
-matches the name of the project.
-
-You can easily force this just by creating a repo/git directory too::
-
-  cd
-  mkdir -p pgwork/repo/git
-  peg init test
-  . peg build
-  psql
-
-
-git repo with patch
-~~~~~~~~~~~~~~~~~~~
+Applying a patch to a git repo project
+--------------------------------------
 
 Here's how you might test a patch using git for the base repo::
 
@@ -198,6 +186,71 @@ try the following instead::
 
 The parameter passed to "-p" in this case can vary; 0 is also common.
 You'll need to be able to read the patch to predict what it should be.
+
+See http://wiki.postgresql.org/wiki/Working_with_Git for more
+information about how to deal with patches, as well as other aspects of
+PostgreSQL plus git use.
+
+Sample tgz session
+==================
+
+Here's how you might use peg to test out an alpha or beta build
+downloaded in source code form.  To do that instead of using a regular
+repo, you merely need to create a tgz repo directory and drop the file
+into there::
+
+  # Repo setup:  tgz
+  cd
+  mkdir -p pgwork/repo/tgz
+  cp postgresql-9.1alpha1.tar.gz pgwork/repo/tgz
+
+  # Basic install
+  peg init test
+  . peg build
+  psql
+
+cvs or tgz repo with patch
+--------------------------
+
+Here's how you might test a patch using CVS for the base repo::
+
+  peg init test
+  cd pgwork/src/test
+  patch -p 0 < some.patch
+  . peg build
+  psql
+
+TODO:  Test the above
+
+Sample cvs session
+==================
+
+You can clone the postgresql.org cvs repo just by changing your default
+PGVCS to be cvs::
+
+  cd
+  mkdir -p pgwork
+
+  # Repo setup:  cvs
+  export PGVCS=csv
+  peg init test
+  . peg build
+  psql
+
+This will synchronize with the master PostgreSQL git server via rsync, using
+the same techniques documented at
+http://wiki.postgresql.org/wiki/Working_with_CVS
+(The outline given in its "Initial setup" section is actually peg's distant
+ancestor)  The main reason why you might want to use CVS is if you
+are doing development on an older server where git cannot be installed.
+
+You can easily force this just by creating a repo/cvs directory too::
+
+  cd
+  mkdir -p pgwork/repo/cvs
+  peg init test
+  . peg build
+  psql
 
 Sample two-cluster session
 ==========================
@@ -281,31 +334,6 @@ The following subcommands are accepted by peg:
  * stop:  Stop a cluster
  * rm:  Remove all data from a project (but not the repo)
 
-Shortcuts
-=========
-
-Once you've gotten an environment setup, using it again can be as easy as::
-
-  . peg switch
-  
-That will use whatever project name you last gave the script and start the
-server up.  If you shutdown your system, that should be all that's needed
-to bring things back up again.
-
-When you source the peg script, along with getting settings like PGDATA
-available it also creates a couple of quick aliases you can use instead
-of calling peg for those functions:
-
- * start:  If you already have a database cluster setup, start it
- * stop:  Stop a running database with the slow shutdown code
- * immediate:  Stop a running database immediately
-
-Here again, the names were picked to be similar to the 
-"service postgresql start" and stop commands used by the RPM packaging.
-start and stop are used on some UNIX systems for job control or system
-initialization.  It's unlikely you'll need those while doing PostgreSQL
-work too, so re-using those commands for this should save you some typing.
-
 Environment variable reference
 ==============================
 
@@ -328,14 +356,7 @@ points to a separate location where you want your database to go.
  * PGPROJECT:  If this is set, it will become the project name used
    for all commands, regardless of what's passed on the command line.
  * PGDEBUG:  By default, peg builds PostgreSQL with the standard flags
-   you'd want to use for development and testing.  This includes assertions,
-   which will slow down the code considerably.  If you want to build without
-   assertions and debugging information, you'll need to set this to a
-   non-empty value that can be passed through to "configure" without
-   doing anything.  A space works for this, for example:: 
-   
-     export PGDEBUG=" "  
-
+   you'd want to use for development and testing.
  * PGMAKE:  Program to run GNU make.  This defaults to "make" but can be
    overridden.
 
@@ -359,7 +380,7 @@ open issues in the code.  A few of these turn into functional issues you
 should be aware of.
 
 Serious problems
-~~~~~~~~~~~~~~~~
+----------------
 
 So far these are serious only in the sense that you are likely to run into
 them and the problems they cause are annoying.  But the workarounds to avoid
@@ -382,23 +403,23 @@ each are pretty simple.
      peg build
      . peg switch
 
- * peg has a notion that you might set PGDATA directly, rather than want that
-   particular directory structure to be in the same PGWORK area everything
-   else is at.  And when you source peg into your environment to use
-   a project, this sets PGDATA.  This combination causes a major issue
-   when switching projects that are in fact both hosted in the PGWORK
-   structure.  You'll get the PGDATA from the original project, and the
-   one you're switching to will believe that's a manually set PGDATA it
-   should use.  So everything else will switch to the new project,
-   except the database directory, which is confusing.  This problem
-   will eventually be addressed in the code.  To work around
-   it for now, before doing "peg switch" you should erase PGDATA (and PGLOG,
-   which suffers from the same issue)::
+* peg has a notion that you might set PGDATA directly, rather than want that
+  particular directory structure to be in the same PGWORK area everything
+  else is at.  And when you source peg into your environment to use
+  a project, this sets PGDATA.  This combination causes a major issue
+  when switching projects that are in fact both hosted in the PGWORK
+  structure.  You'll get the PGDATA from the original project, and the
+  one you're switching to will believe that's a manually set PGDATA it
+  should use.  So everything else will switch to the new project,
+  except the database directory, which is confusing.  This problem
+  will eventually be addressed in the code.  To work around
+  it for now, before doing "peg switch" you should erase PGDATA (and PGLOG,
+  which suffers from the same issue)::
 
      unset PGDATA PGLOG
 
 Trivial bugs
-~~~~~~~~~~~~
+------------
 
  * peg creates a database matching your name, which is what psql wants for a
    default.  It doesn't check whether it already exist first though, so you'll
@@ -444,4 +465,3 @@ of the PostgreSQL community, including:
   and Jeff both had their own way to organize PostgreSQL installations
   in their respective home directories that I found interesting when we
   worked together on projects.
-

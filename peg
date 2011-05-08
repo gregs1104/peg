@@ -12,7 +12,7 @@
 # such as PGLOG.
 
 #
-# Copyright (c) 2009, Gregory Smith
+# Copyright (c) 2009-2011, Gregory Smith
 # All rights reserved.
 # See COPYRIGHT for license details.
 #
@@ -36,7 +36,7 @@ echo build-only:  Execute the build steps and create a database cluster, but
 echo "don't start it.  This is typically for if you know you need to modify the"
 echo database configuration before you start it.
 echo 
-echo build:  Build binaries, install them, create a cluster, start the databas
+echo build:  Build binaries, install them, create a cluster, start the database
 echo initdb:  Create a cluster
 echo switch:  Switch to an existing built binary set and cluster
 echo start:  Start a cluster
@@ -514,7 +514,7 @@ fi
 # In cases where we're not passed a PGVCS, or it appears invalid,
 # now that we know where the local repo is stored see if there's
 # already something there.  If so, determine PGVCS from it.
-# Default to grabbing from CVS if no source is specified and
+# Default to grabbing from git if no source is specified and
 # there's nothing useful in the directory tree.
 
 if [ -n "$PGVCS" ] ; then
@@ -529,7 +529,7 @@ elif [ -d "$PGREPO/$CVSDIR" ] ; then
   PGVCS=$CVSDIR
   echo Using discovered PGVCS=$PGVCS
 else
-  PGVCS=$CVSDIR
+  PGVCS=$GITDIR
   echo Using default PGVCS=$PGVCS
 fi
 
@@ -647,4 +647,3 @@ if [ -z "$ERROR" ]; then
 else
   $(exit $ERROR)
 fi
-
