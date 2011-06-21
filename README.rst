@@ -328,6 +328,9 @@ The following subcommands are accepted by peg:
    don't start it.  This is typically for if you know you need to modify the
    database configuration before you start it.
  * build:  Build binaries, install them, create a cluster, start the database
+ * rebuild:  Rebuild and install just the main binaries for the server in
+   the src/backend directory.  When making changes to just the core server
+   code, this can save time over doing a full build.
  * initdb:  Create a cluster
  * switch:  Switch to an existing built binary set and cluster
  * start:  Start a cluster

@@ -43,6 +43,7 @@ echo start:  Start a cluster
 echo stop:  Stop a cluster
 echo "rm:  Remove all data from a project (but not the repo)"
 echo "clean:  Clean up the source code tree ('make maintainer-clean')"
+echo rebuild:  Just build the main server files in the server backend
 }
 
 # Set $1 to $2 only if it's empty
@@ -385,6 +386,21 @@ function build {
   $PGMAKE -j 4 && $PGMAKE install
 }
 
+function rebuild {
+  # Check if initdb binary exists
+  if [ ! -x $PGENGINE/initdb ]; then
+    echo WARNING:  No existing binary found, executing full build instead of rebuild
+    build
+  elif [ ! -f $PGSRC/$PGPROJECT/GNUmakefile ] ; then
+    echo "WARNING:  Didn't find an existing GNUmakefile, executing full build instead of rebuild"
+    build
+  else
+    # Looks good to rebuild with install-bin here
+    cd $PGSRC/$PGPROJECT/src/backend
+    $PGMAKE install-bin
+  fi
+}
+
 function initdb {
   if [ ! -f "$PGDATA/PG_VERSION" ] ; then
     $PGENGINE/initdb -D $PGDATA  
@@ -582,6 +598,14 @@ elif [ "$COMMAND" = "build-only" ] ; then
 elif [ "$COMMAND" = "build" ] ; then
   wrap require_project 
   wrap build
+  wrap require_binary
+  wrap initdb
+  wrap start
+  wrap add_user_db
+
+elif [ "$COMMAND" = "rebuild" ] ; then
+  wrap require_project 
+  wrap rebuild
   wrap require_binary
   wrap initdb
   wrap start
