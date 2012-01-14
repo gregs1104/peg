@@ -3,3 +3,4 @@
     2011-01-15 Add "clean" command and improve documentation
     2011-05-08 Switch to git as default repo, more doc updates
     2011-06-20 Add "rebuild" command
+    2012-01-14 Be explicit about the PostgreSQL git repo branch

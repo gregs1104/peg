@@ -87,6 +87,11 @@ TGZDIR="tgz"
 GITPGROOTDIR="postgresql"
 CVSPGROOTDIR="pgsql"
 
+# Remote branch of interest for the PostgreSQL git repo
+# TODO An easy UI for checking out back branches would be nice
+GITMASTERREPO="origin"
+GITMASTERBRANCH="$GITMASTERREPO/master"
+
 function error {
   # Report an error and save its value for exit and wrap's command filtering
   ERROR=$1
@@ -163,7 +168,8 @@ function pull_git {
     # Apparently we already have a repo around
     echo "Updating existing git repository at $GITPGROOTDIR"
     cd $GITPGROOTDIR
-    git fetch
+    git fetch $GITMASTERREPO
+    git merge $GITMASTERBRANCH
   else
     echo "Creating new git repository from master repo"
     git clone git://git.postgresql.org/git/postgresql.git
@@ -261,7 +267,7 @@ function checkout_repo_git {
   link_project_git
   cd $PGSRC/$PGPROJECT
   # TODO This will fail if this branch already exists.
-  git checkout -b $PGPROJECT
+  git checkout -b $PGPROJECT $GITMASTERBRANCH
 }
 
 function checkout_repo_cvs {
@@ -349,10 +355,11 @@ function update_cvs {
 }
 
 function update_git {
-  # TODO Should this split fetch/merge steps based on whether
+  # TODO Should this consider not merging automatically based on whether
   # a PGPROJECT name was passed or not?
   cd $PGSRC/$PGPROJECT
-  git pull
+  git fetch $GITMASTERREPO
+  git merge $GITMASTERBRANCH
 }
 
 function update_project {

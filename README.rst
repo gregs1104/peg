@@ -450,7 +450,7 @@ If you have any hints, changes or improvements, please contact:
 Credits
 =======
 
-Copyright (c) 2009-2011, Gregory Smith
+Copyright (c) 2009-2012, Gregory Smith
 All rights reserved.
 See COPYRIGHT file for full license details
 
