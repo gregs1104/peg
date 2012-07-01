@@ -48,7 +48,7 @@ operate on, which right now is always a project name.
 Installation
 ============
 
-peg is so far a single script that doesn't rely on anything else.  You
+peg is so far a single script; its only dependency is Bash.  You
 can just copy or link it to any directory that's in your path, such
 as /usr/local/bin for a system-wide install.  Here's a sample
 installation that checks out a working copy and then
@@ -65,7 +65,7 @@ Creating a first project
 The easiest way to make peg work is to create a $HOME/pgwork directory and
 let peg manage the whole thing for you::
 
-  # git repo setup example
+  # git repo setup example (you must be running bash)
   cd
   mkdir -p pgwork
   peg init test
