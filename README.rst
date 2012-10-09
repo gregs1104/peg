@@ -299,6 +299,37 @@ environment variable you sourced in.  Instead you need to do this::
 TODO:  The above still doesn't work.  But if you start a whole new shell,
 that seems to be fine.
 
+Sample backporting setup
+========================
+
+Backporting involves taking code from a newer version of a program and
+applying it to an earlier one.  For this example, imagine that the goal
+is to apply a patch developed for PostgreSQL 9.2 to version 9.1.  This
+only works in peg if you are using the default git repository, where it's
+easy to checkout any version of the database code.
+
+A backporting setup works just like a regular git session, just setting
+the PGVERSION environment variable first:
+
+  export PGVERSION="9.1"
+  cd
+  mkdir -p pgwork
+  peg init test
+
+Now you can make the changes you have from a later version to the source
+code, using something like the patch application example above.  In some
+cases, source changes must be applied before compiling PostgreSQL at all.
+Many source code patches can be applied and worked on after a build step
+too.
+
+If the change you're looking for is a feature added to a later PostgreSQL
+version, you might apply it to the older version you have checked out
+using "git cherry-pick" instead.
+
+
+  . peg build
+  psql
+
 Base directory detection
 ========================
 
