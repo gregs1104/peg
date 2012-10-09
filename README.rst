@@ -326,6 +326,7 @@ If the change you're looking for is a feature added to a later PostgreSQL
 version, you might apply it to the older version you have checked out
 using "git cherry-pick" instead.
 
+Once all the changes are made, build the database source code and test::
 
   . peg build
   psql
