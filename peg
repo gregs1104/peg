@@ -12,7 +12,7 @@
 # such as PGLOG.
 
 #
-# Copyright (c) 2009-2011, Gregory Smith
+# Copyright (c) 2009-2012, Gregory Smith
 # All rights reserved.
 # See COPYRIGHT for license details.
 #
@@ -88,9 +88,20 @@ GITPGROOTDIR="postgresql"
 CVSPGROOTDIR="pgsql"
 
 # Remote branch of interest for the PostgreSQL git repo
-# TODO An easy UI for checking out back branches would be nice
 GITMASTERREPO="origin"
-GITMASTERBRANCH="$GITMASTERREPO/master"
+if [ -n "$PGVERSION" ] ; then
+  # PGVERSION is expected to be either like 8.4 (the official versions) or
+  # 8_4 (how the back branches are actually named).  If a period was used,
+  # switch to the 8_4 style instead.
+  set_if_empty GITMASTERBRANCH "$GITMASTERREPO/REL${PGVERSION/./_}_STABLE"
+else
+  set_if_empty GITMASTERBRANCH "$GITMASTERREPO/master"
+fi
+# Note that the use of set_if_empty allows an undocumented feature here.
+# If you know the exact branch name you want, you can specify it using
+# GITMASTERBRANCH instead of PGVERSION.  One possible reason you might
+# want to do that is to checkout an old branch that isn't a 
+
 
 function error {
   # Report an error and save its value for exit and wrap's command filtering
@@ -169,7 +180,23 @@ function pull_git {
     echo "Updating existing git repository at $GITPGROOTDIR"
     cd $GITPGROOTDIR
     git fetch $GITMASTERREPO
-    git merge $GITMASTERBRANCH
+
+    # To match the workflow of a normal "git pull", there used to be a
+    # merge step here too:
+    #
+    #   git merge $GITMASTERBRANCH
+    #
+    # Given that pull_git is called as part of general repository setup
+    # (its only caller is setup_repo), this isn't the right place to do
+    # a merge step though.
+    #
+    # The reason it had to be removed is that trying a merge here causes
+    # branch switch attempts via PGVERSION to fail.  
+    #
+    # This was never needed if you're going to checkout a new branch, such
+    # as when running "init".  That will pull from the master directly
+    # rather than needing a merge to happen here first.
+
   else
     echo "Creating new git repository from master repo"
     git clone git://git.postgresql.org/git/postgresql.git
@@ -476,6 +503,13 @@ function report_env {
   echo
   echo "Active Project:"  
   echo PGPROJECT=$PGPROJECT 
+
+  # Only report on branch information if it's not the empty default
+  if [ -n "$PGVERSION" ]; then
+    echo PGVERSION=$PGVERSION
+    echo git branch=$GITMASTERBRANCH
+  fi
+
   echo
   echo "Project specific directories (only if defined):"
   echo PGENGINE=$PGENGINE

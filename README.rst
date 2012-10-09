@@ -165,8 +165,8 @@ build steps, you can remove the symlink and manually copy the master repo.
 TODO:  Provide an example of that
 
 If you intend to work on multiple projects using a single git repo, make
-sure you note the "Serious problems" section below for caveats about
-common issues there.
+sure you note the "Known Issues" section below for caveats about
+common problems, and how to resolve them.
 
 Applying a patch to a git repo project
 --------------------------------------
@@ -362,6 +362,11 @@ points to a separate location where you want your database to go.
    you'd want to use for development and testing.
  * PGMAKE:  Program to run GNU make.  This defaults to "make" but can be
    overridden.
+ * PGVERSION:  Stable version of PostgreSQL to checkout, when a new project
+   is created with "peg init".  If not specified, the "master" branch of the
+   repository is used.  Only useful if peg is running against a git repo.
+   This will accept either standard version numbers like "9.1", or version
+   names that match the actual stable branch naming conventions like "9_1".
 
 Solaris Use
 ===========
@@ -381,6 +386,57 @@ Known Issues
 See TODO notes in the peg source code (and even this documentation) for the
 open issues in the code.  A few of these turn into functional issues you
 should be aware of.
+
+git Branching and Cleanup
+-------------------------
+
+When using git, peg links all projects to a single git directory, with each
+project treated as a branch.  The program expects that you'll manage
+complicated operations here on your own, rather than trying to force git
+changes that can potentially be destructive.  One area this can cause
+many problems is if you're trying to switch to a new origin branch,
+such as when using the PGVERSION variable.  Moving from the default branch
+(origin/master) to another version, or the reverse, will usually require
+some manual cleanup of the git checkout before running "peg init".
+
+You always want to be careful to commit any working code to your active
+branch before trying to change to a new project, and therefore a new git
+branch.  Checking the status of the repository checkout is a good habit to
+adopt before running "peg init" to try and create a new project.
+
+You can check if your git checkout is completely cleaned up--and therefore
+able to accept a branch change with complain--by seeing if its status looks
+like this::
+
+  $ git status
+  # On branch master
+  nothing to commit (working directory clean)
+
+If you see modified or untracked files there, a checkout that tries to change
+origin branch version is unlikely to work.  A typical error if cleanup isn't
+done correctly before "peg init" is many "needs merge" warnings ending
+with::
+
+  error: you need to resolve your current index first
+
+Most files that cause this sort of problem can be cleaned up by going into
+src directory--which is just a link to the repo directory when using peg with
+git, and you can go there instead--and executing::
+
+  git reset --hard
+
+This will not remove new files that have been added though, which can still
+cause you issues.  For example, if the same file names have also been used
+in the new branch you're checking out, this will cause you some trouble.
+One common way developer checkouts can get this sort of "Untracked files"
+is if you build ctags to help navigate the source code.  All new files and
+directories can be removed with::
+
+  git clean -f -d
+
+It's very important to move any important files you've added out of the git
+directory tree before using "git clean" like this.  It will wipe everything
+other than the expected repository files out.
 
 Serious problems
 ----------------
