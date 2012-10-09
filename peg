@@ -243,7 +243,7 @@ function extract_project_tgz
       mv $TGZPGROOTDIR/* $PGSRC/$PGPROJECT
       rmdir $TGZPGROOTDIR
     else
-      error 14 "Cannot determine subdirectory root for extracted tar file, needs a manual fix"
+      error 15 "Cannot determine subdirectory root for extracted tar file, needs a manual fix"
     fi
   fi
 }
@@ -409,6 +409,30 @@ function require_binary {
   fi
 }
 
+function detect_cpus {
+  # This will work on a Mac and possibly other BSD systems, but is expected
+  # to fail on Linux.
+  CPUS=`sysctl -n hw.ncpu 2>/dev/null`
+
+  # getconf should work on Linux but not a Mac.  Try the "online" processor
+  # count first, but fallback to the total number if it's not available
+  if [ -z "$CPUS" ]; then
+    CPUS=`getconf _NPROCESSORS_ONLN 2>/dev/null`
+  fi
+
+  if [ -z "$CPUS" ]; then
+    CPUS=`getconf _NPROCESSORS_CONF 2>/dev/null`
+  fi
+
+  # TODO Test whether any of these CPU counters work on FreeBSD and Solaris
+
+  if [ -z "$CPUS" ]; then
+    # If there's no more accurate guess, running make with 4 processes works
+    # well enough on typical hardware circa 2012.  
+    CPUS=4
+  fi
+}
+
 function build {
   cd $PGSRC/$PGPROJECT
   if [ -f GNUmakefile ] ; then
@@ -416,8 +440,14 @@ function build {
   else
     ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $PGDEBUG
   fi
-  # TODO Detect CPUs and set jobs accordingly
-  $PGMAKE -j 4 && $PGMAKE install
+
+  detect_cpus
+  if [ -z "$CPUS" ] ; then
+    error 16 "Bug in detect_cpus function, returned a null value"
+  fi
+  echo Building using $CPUS CPUs
+
+  $PGMAKE -j $CPUS && $PGMAKE install
 }
 
 function rebuild {
