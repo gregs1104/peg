@@ -309,7 +309,7 @@ only works in peg if you are using the default git repository, where it's
 easy to checkout any version of the database code.
 
 A backporting setup works just like a regular git session, just setting
-the PGVERSION environment variable first:
+the PGVERSION environment variable first::
 
   export PGVERSION="9.1"
   cd
