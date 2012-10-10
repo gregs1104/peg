@@ -13,18 +13,31 @@ Motivation
 ==========
 
 peg usage relies heavily on environment variables.  As much as possible, it
-mirrors the environment setups of two common PostgreSQL setups:
+mirrors the environment setups of two common PostgreSQL setups:  psql and
+the RPM packaging of the program.
 
- * The psql client and other programs that use the libpq library look for
-   environment variables such as PGPORT to change their behavior.  Server
-   startup does some of this as well, such as using PGDATA to set the database
-   location.
- * The RPM packaging used by RedHat's PostgreSQL server uses a sourced
-   environment stored in /etc/sysconfig/postgresql/postgresql which defines
-   PGDATA.  One useful idiom when working with postgresql is to have the
-   login profile of the postgres user and others using Postgres to source
-   this file, and therefore have the exact same settings used to start
-   the server.
+The psql client and other programs that use the libpq library look for
+environment variables such as PGPORT to change their behavior.  Server
+startup does some of this as well, such as using PGDATA to set the database
+location.
+
+The RPM packaging used by RedHat's PostgreSQL server uses a sourced
+environment stored in /etc/sysconfig/pgsql/postgresql[version] which
+can define settings like PGDATA.  One useful idiom when working with
+postgresql is to have the login profile of the postgres user and others
+using Postgres to source this file, and therefore have the exact same
+settings used to start the server.  That file might look like this::
+
+  PGENGINE=/usr/pgsql-9.1/bin
+  PGPORT=5432
+  PGDATA=/var/lib/pgsql/9.1/data
+  PGLOG=/var/lib/pgsql/9.1/pgstartup.log
+
+To make these available to the user running the database, typically
+postgres, that user's login profile would execute a shell command like
+this::
+
+  source /etc/sysconfig/pgsql/postgresql-9.1
    
 The idea is that once you've setup an environment with peg, the environment
 variables you'll have available to you will match what you'd get if you
@@ -35,8 +48,6 @@ a production RHEL server::
 
   pg_ctl start -l $PGLOG
   $EDITOR $PGDATA/postgresql.conf
-
-TODO:  Show a sample RHEL sysconfig script for comparison sake
 
 Whether or not you find that useful, you'll also get source code builds and
 cluster creation, setup, and control automated by using peg.
