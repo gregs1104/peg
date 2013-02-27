@@ -465,7 +465,7 @@ function rebuild {
   fi
 }
 
-function initdb {
+function initdb_peg {
   if [ ! -f "$PGDATA/PG_VERSION" ] ; then
     $PGENGINE/initdb -D $PGDATA  
     if [ "$?" -ne "0" ]; then
@@ -664,13 +664,13 @@ elif [ "$COMMAND" = "build-only" ] ; then
   wrap require_project
   wrap build
   wrap require_binary
-  wrap initdb
+  wrap initdb_peg
 
 elif [ "$COMMAND" = "build" ] ; then
   wrap require_project 
   wrap build
   wrap require_binary
-  wrap initdb
+  wrap initdb_peg
   wrap start
   wrap add_user_db
 
@@ -678,7 +678,7 @@ elif [ "$COMMAND" = "rebuild" ] ; then
   wrap require_project 
   wrap rebuild
   wrap require_binary
-  wrap initdb
+  wrap initdb_peg
   wrap start
   wrap add_user_db
 
@@ -687,7 +687,7 @@ elif [ "$COMMAND" = "initdb" ] ; then
   # postgresql.conf before starting
   wrap require_project
   wrap require_binary
-  wrap initdb
+  wrap initdb_peg
 
 elif [ "$COMMAND" = "switch" ] ; then
   wrap require_project
@@ -698,7 +698,7 @@ elif [ "$COMMAND" = "switch" ] ; then
 elif [ "$COMMAND" = "start" ] ; then
   wrap require_project
   wrap require_binary
-  wrap initdb
+  wrap initdb_peg
   wrap start
   wrap add_user_db
 

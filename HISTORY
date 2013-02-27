@@ -5,3 +5,4 @@
     2011-06-20 Add "rebuild" command
     2012-01-14 Be explicit about the PostgreSQL git repo branch
     2012-10-09 Add PGVERSION support, detect CPU count for make
+    2013-02-26 Fix issue with initdb function clashing on OS X
