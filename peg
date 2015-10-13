@@ -293,7 +293,9 @@ function setup_repo {
 function checkout_repo_git {
   link_project_git
   cd $PGSRC/$PGPROJECT
-  # TODO This will fail if this branch already exists.
+
+  # Create new branch only if the branch doesn't already
+  git rev-parse --verify $PGPROJECT 2>&1 > /dev/null || \
   git checkout -b $PGPROJECT $GITMASTERBRANCH
 }
 
