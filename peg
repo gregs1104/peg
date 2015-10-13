@@ -523,9 +523,12 @@ function add_user_db {
   # psql by default wants to connect to a database with the same user
   # as is running the program.  createdb will default to creating a user
   # with the same name.  Might as well take advantage of that synergy.
-  
-  # TODO Only execute this if the database doesn't already exist
-  $PGENGINE/createdb
+
+  if [ -x /usr/bin/whoami ] ; then
+    $PGENGINE/psql $(whoami) -c ';' 2>/dev/null >/dev/null || $PGENGINE/createdb
+  else
+    $PGENGINE/createdb
+  fi;
 }
 
 function report_env {
