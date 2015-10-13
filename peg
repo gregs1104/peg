@@ -337,7 +337,11 @@ function clean_project {
   if [ -d "$PGSRC/$PGPROJECT" ] ; then
     echo Cleaning out source code tree at $PGSRC/$PGPROJECT
     pushd $PGSRC/$PGPROJECT
-    make maintainer-clean
+    # The PG Makefile itself uses this check to ensure
+    # configure has been run prior to a 'make clean'
+    if [ -f GNUmakefile ] ; then
+      make maintainer-clean
+    fi;
     popd
     echo maintainer-clean of source directory $PGSRC/$PRPROJECT finished
   else
@@ -353,7 +357,11 @@ function remove_project {
     GITBASE="$GITROOT/$GITPGROOTDIR"
     echo Cleaning out all build artifacts from the git repo at $GITBASE
     pushd $GITBASE
-    make maintainer-clean
+    # The PG Makefile itself uses this check to ensure
+    # configure has been run prior to a 'make clean'
+    if [ -f GNUmakefile ] ; then
+      make maintainer-clean
+    fi;
     popd
     echo maintainer-clean of repo directory $GITBASE finished
   fi
