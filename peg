@@ -452,18 +452,18 @@ function detect_cpus {
 
   if [ -z "$CPUS" ]; then
     # If there's no more accurate guess, running make with 4 processes works
-    # well enough on typical hardware circa 2012.  
+    # well enough on typical hardware circa 2012.
     CPUS=4
   fi
 }
 
 function build {
   cd $PGSRC/$PGPROJECT
-  if [ -f GNUmakefile ] ; then
-    echo WARNING:  Build found an existing GNUmakefile, not running configure again
-  else
-    ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $PGDEBUG
-  fi
+
+  $PGMAKE distclean # always clean first, files in working dir may belong to
+	                  # may belong to the branch we just checked out of
+
+  ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $PGDEBUG
 
   detect_cpus
   if [ -z "$CPUS" ] ; then
