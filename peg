@@ -326,10 +326,19 @@ function create_project {
 
 function rm_if_exists {
   if [ -d "$1" ] ; then
-    echo Erasing directory $1 
+    echo Erasing directory $1
     rm -rf "$1"
   else
     echo Not removing directory $1 because it does not exist
+  fi
+}
+
+function rm_file_if_exists {
+  if [ -f "$1" ] ; then
+    echo Erasing file $1
+    rm -rf "$1"
+  else
+    echo Not removing file $1 because it does not exist
   fi
 }
 
@@ -374,6 +383,8 @@ function remove_project {
   rm_if_exists "$PGWORK/$DATADIR/$PGPROJECT"
   rm_if_exists "$PGINST/$PGPROJECT"
   rm_if_exists "$PGSRC/$PGPROJECT"
+  rm_file_if_exists "$PGWORK/lastproject"
+
 }
 
 function optional_project {
