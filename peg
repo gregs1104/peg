@@ -297,6 +297,9 @@ function checkout_repo_git {
   # Create new branch only if the branch doesn't already
   git rev-parse --verify $PGPROJECT 2>&1 > /dev/null || \
   git checkout -b $PGPROJECT $GITMASTERBRANCH
+
+  # But always checkout the branch
+  git checkout $PGPROJECT
 }
 
 function checkout_repo_cvs {
