@@ -293,8 +293,13 @@ function setup_repo {
 function checkout_repo_git {
   link_project_git
   cd $PGSRC/$PGPROJECT
-  # TODO This will fail if this branch already exists.
+
+  # Create new branch only if the branch doesn't already
+  git rev-parse --verify $PGPROJECT 2>&1 > /dev/null || \
   git checkout -b $PGPROJECT $GITMASTERBRANCH
+
+  # But always checkout the branch
+  git checkout $PGPROJECT
 }
 
 function checkout_repo_cvs {
@@ -321,10 +326,19 @@ function create_project {
 
 function rm_if_exists {
   if [ -d "$1" ] ; then
-    echo Erasing directory $1 
+    echo Erasing directory $1
     rm -rf "$1"
   else
     echo Not removing directory $1 because it does not exist
+  fi
+}
+
+function rm_file_if_exists {
+  if [ -f "$1" ] ; then
+    echo Erasing file $1
+    rm -rf "$1"
+  else
+    echo Not removing file $1 because it does not exist
   fi
 }
 
@@ -332,7 +346,11 @@ function clean_project {
   if [ -d "$PGSRC/$PGPROJECT" ] ; then
     echo Cleaning out source code tree at $PGSRC/$PGPROJECT
     pushd $PGSRC/$PGPROJECT
-    make maintainer-clean
+    # The PG Makefile itself uses this check to ensure
+    # configure has been run prior to a 'make clean'
+    if [ -f GNUmakefile ] ; then
+      make maintainer-clean
+    fi;
     popd
     echo maintainer-clean of source directory $PGSRC/$PRPROJECT finished
   else
@@ -348,7 +366,11 @@ function remove_project {
     GITBASE="$GITROOT/$GITPGROOTDIR"
     echo Cleaning out all build artifacts from the git repo at $GITBASE
     pushd $GITBASE
-    make maintainer-clean
+    # The PG Makefile itself uses this check to ensure
+    # configure has been run prior to a 'make clean'
+    if [ -f GNUmakefile ] ; then
+      make maintainer-clean
+    fi;
     popd
     echo maintainer-clean of repo directory $GITBASE finished
   fi
@@ -361,6 +383,8 @@ function remove_project {
   rm_if_exists "$PGWORK/$DATADIR/$PGPROJECT"
   rm_if_exists "$PGINST/$PGPROJECT"
   rm_if_exists "$PGSRC/$PGPROJECT"
+  rm_file_if_exists "$PGWORK/lastproject"
+
 }
 
 function optional_project {
@@ -428,18 +452,18 @@ function detect_cpus {
 
   if [ -z "$CPUS" ]; then
     # If there's no more accurate guess, running make with 4 processes works
-    # well enough on typical hardware circa 2012.  
+    # well enough on typical hardware circa 2012.
     CPUS=4
   fi
 }
 
 function build {
   cd $PGSRC/$PGPROJECT
-  if [ -f GNUmakefile ] ; then
-    echo WARNING:  Build found an existing GNUmakefile, not running configure again
-  else
-    ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $PGDEBUG
-  fi
+
+  $PGMAKE distclean # always clean first, files in working dir may belong to
+	                  # may belong to the branch we just checked out of
+
+  ./configure --prefix=$PGINST/$PGPROJECT --enable-depend --enable-thread-safety $PGDEBUG
 
   detect_cpus
   if [ -z "$CPUS" ] ; then
@@ -518,9 +542,12 @@ function add_user_db {
   # psql by default wants to connect to a database with the same user
   # as is running the program.  createdb will default to creating a user
   # with the same name.  Might as well take advantage of that synergy.
-  
-  # TODO Only execute this if the database doesn't already exist
-  $PGENGINE/createdb
+
+  if [ -x /usr/bin/whoami ] ; then
+    $PGENGINE/psql $(whoami) -c ';' 2>/dev/null >/dev/null || $PGENGINE/createdb
+  else
+    $PGENGINE/createdb
+  fi;
 }
 
 function report_env {
