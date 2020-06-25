@@ -544,12 +544,12 @@ The project is hosted at http://github.com/gregs1104/peg
 
 If you have any hints, changes or improvements, please contact:
 
- * Greg Smith gsmith@gregsmith.com
+ * Greg Smith gregs1104@gmail.com
 
 Credits
 =======
 
-Copyright (c) 2009-2013, Gregory Smith
+Copyright (c) 2009-2020, Gregory Smith
 All rights reserved.
 See COPYRIGHT file for full license details
 
